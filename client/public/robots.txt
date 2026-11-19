@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api/
+# PLACEHOLDER: replace YOUR-DOMAIN once the domain is live
+Sitemap: https://YOUR-DOMAIN/sitemap.xml
