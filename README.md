@@ -6,7 +6,7 @@ Content comes from _Profile, Work Plan & Governance_ (Oct 2026) and lives in `cl
 
 ## Features
 
-- **Public site:** Home, About (board, governance, registrations), Programmes, Membership, Ecosystem (Venturecore → Pirento Foundation → School / University of Pirento as future plans; Bharat ID by Pirento; Pirento One; pirento.com), Updates, Donate, Contact, Verify, and the three policies.
+- **Public site:** Home, About (board, governance, registrations), Programmes, Membership, Ecosystem (Venturecore → Pirento Foundation → School / University of Pirento as future plans, and the ten Pirento products: Legal, Black, Green, Intern, AI, Vault, One, Capital, Bharat ID, Giftox; pirento.com), Updates, Donate, Contact, Verify, and the three policies.
 - **Donations without login:** one-time or monthly. After payment an account is created for the donor's email (or the gift is linked to the existing one) and a one-time _set your password_ link is emailed (7 days). Passwords are never emailed.
 - **80G receipts:** PDF per donation with the section 80G(5) particulars (Foundation PAN, 80G URN and validity, donor name/address/PAN, amount in figures and words, mode, Form 10BD/10BE note). Numbers come from **Admin → Settings**; until the 80G URN and PAN are entered, receipts say so instead of guessing. Opened by the donor's private link, their account, or an admin.
 - **Monthly giving:** Razorpay Subscriptions (a plan per amount is created once). Every charge becomes a donation with its own receipt; only the first gets a certificate. Donors stop it from their dashboard.
@@ -45,7 +45,7 @@ The Bharat ID team registers this site as an OpenID Connect client. Needed from 
 ## Login providers
 
 - **Google:** set `GOOGLE_CLIENT_ID` (OAuth client, type Web; add your domain to Authorised JavaScript origins). The button appears automatically.
-- **Email OTP:** set `SMTP_*`. **Mobile OTP:** set `TWILIO_*` (Indian SMS needs a DLT-registered sender/template).
+- **Email OTP:** set `SMTP_*`. **Mobile OTP:** set `MSG91_AUTH_KEY` + `MSG91_TEMPLATE_ID` (recommended for India; the OTP template must be DLT-registered and contain `##OTP##`), or `TWILIO_*`. The Mobile and Bharat ID options are always shown; until a provider is connected they explain that instead of failing silently.
 - For local testing without a provider, set `DEV_SHOW_CODES=1`: codes are logged and shown on screen as "Test mode". Without it (and always when `NODE_ENV=production`) a channel with no provider refuses to send.
 
 ## Razorpay activation checklist

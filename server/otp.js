@@ -68,28 +68,45 @@ export async function checkOtp(target, purpose, code) {
   return otp;
 }
 
-// SMS via Twilio's REST API. For Indian numbers, a DLT-registered sender and template are required by TRAI.
+const msg91On = () => Boolean(process.env.MSG91_AUTH_KEY && process.env.MSG91_TEMPLATE_ID);
+const twilioOn = () =>
+  Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM);
+export const canSms = () => msg91On() || twilioOn();
+
+/**
+ * Sends the code by SMS. MSG91 is preferred for Indian numbers: its OTP template is DLT-registered,
+ * which TRAI requires. Twilio is the fallback (it also needs a DLT sender for India).
+ */
 async function sendSms(to, code) {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
-    method: 'POST',
-    headers: {
-      Authorization: 'Basic ' + Buffer.from(`${sid}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64'),
-    },
-    body: new URLSearchParams({
-      To: to,
-      From: process.env.TWILIO_FROM,
-      Body: `${code} is your Pirento Foundation code. Valid for 10 minutes. Do not share it.`,
-    }),
-  });
+  let r;
+  if (msg91On()) {
+    const url = new URL('https://control.msg91.com/api/v5/otp');
+    url.search = new URLSearchParams({
+      template_id: process.env.MSG91_TEMPLATE_ID,
+      mobile: to.replace('+', ''),
+      otp: code,
+    });
+    r = await fetch(url, { method: 'POST', headers: { authkey: process.env.MSG91_AUTH_KEY } });
+  } else {
+    const sid = process.env.TWILIO_ACCOUNT_SID;
+    r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Basic ' + Buffer.from(`${sid}:${process.env.TWILIO_AUTH_TOKEN}`).toString('base64'),
+      },
+      body: new URLSearchParams({
+        To: to,
+        From: process.env.TWILIO_FROM,
+        Body: `${code} is your Pirento Foundation code. Valid for 10 minutes. Do not share it.`,
+      }),
+    });
+  }
   if (!r.ok) {
     console.error('SMS failed', r.status, await r.text());
     throw httpError(502, 'Could not send the SMS. Please try email instead.');
   }
 }
 
-export const canSms = () =>
-  Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM);
 // Test codes are shown on screen only when explicitly enabled, and never in production.
 export const devCodes = () => process.env.DEV_SHOW_CODES === '1' && process.env.NODE_ENV !== 'production';
 
@@ -101,7 +118,7 @@ export async function deliver(channel, target, code, purpose = 'login') {
     throw httpError(
       503,
       channel === 'email'
-        ? 'Email codes are not set up yet.'
+        ? 'Email codes are not set up yet. Please try again later.'
         : 'SMS codes are not set up yet. Please use email.',
     );
   console.log(`[dev] ${channel} code for ${target}: ${code}`);

@@ -18,10 +18,15 @@ const hmac = (s, d) => crypto.createHmac('sha256', s).update(d).digest('hex');
 // Stand-ins for Razorpay and Bharat ID: intercept their hosts, pass everything else through.
 const realFetch = globalThis.fetch;
 let orderSeq = 0;
+let lastSms = null;
 globalThis.fetch = async (url, opts = {}) => {
   const u = String(url);
   const json = (b) =>
     new Response(JSON.stringify(b), { status: 200, headers: { 'content-type': 'application/json' } });
+  if (u.startsWith('https://control.msg91.com/api/v5/otp')) {
+    lastSms = { url: new URL(u), key: opts.headers.authkey };
+    return json({ type: 'success' });
+  }
   if (u.startsWith('https://api.razorpay.com/v1/orders'))
     return json({ id: `order_${++orderSeq}`, amount: JSON.parse(opts.body).amount });
   if (u.startsWith('https://api.razorpay.com/v1/plans')) return json({ id: 'plan_1' });
@@ -335,4 +340,24 @@ test('guest donation, 80G receipt, monthly giving, membership, Bharat ID, settin
   assert.equal(blocked.status, 503);
   assert.equal(blocked.body.devCode, undefined);
   process.env.DEV_SHOW_CODES = '1';
+
+  // Mobile OTP through MSG91: right number and code reach the provider, and nothing leaks to the browser.
+  Object.assign(process.env, { MSG91_AUTH_KEY: 'mk', MSG91_TEMPLATE_ID: 'tpl' });
+  const sms = await call('POST', '/auth/otp/send', {
+    channel: 'phone',
+    target: '98111 22334',
+    purpose: 'register',
+  });
+  assert.equal(sms.status, 200);
+  assert.equal(sms.body.devCode, undefined);
+  assert.equal(lastSms.key, 'mk');
+  assert.equal(lastSms.url.searchParams.get('mobile'), '919811122334');
+  assert.match(lastSms.url.searchParams.get('otp'), /^\d{6}$/);
+  const ok = await call('POST', '/auth/otp/verify', {
+    channel: 'phone',
+    target: '9811122334',
+    code: lastSms.url.searchParams.get('otp'),
+  });
+  assert.equal(ok.status, 200);
+  delete process.env.MSG91_AUTH_KEY;
 });

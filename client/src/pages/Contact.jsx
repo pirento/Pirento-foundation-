@@ -54,7 +54,7 @@ export default function Contact() {
           <div data-hero-after className="mt-14 flex flex-wrap items-center gap-4">
             <a
               href={`mailto:${brand.email}`}
-              className="display text-[clamp(1.6rem,4vw,3.25rem)] underline decoration-accent decoration-2 underline-offset-[0.2em]"
+              className="display break-all text-[clamp(1.6rem,4vw,3.25rem)] underline decoration-accent decoration-2 underline-offset-[0.2em]"
             >
               {brand.email}
             </a>

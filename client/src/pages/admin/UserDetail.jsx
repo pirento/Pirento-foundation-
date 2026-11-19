@@ -26,7 +26,7 @@ export default function UserDetail() {
       <PageTitle sub={`${u.email}${u.phone ? ` · ${u.phone}` : ''} · joined ${fmtDate(u.createdAt)}`}>
         {u.name}
       </PageTitle>
-      <dl className="grid gap-px overflow-hidden rounded-[22px] border border-rule bg-rule sm:grid-cols-2 xl:grid-cols-4">
+      <dl className="grid gap-px overflow-hidden rounded-[22px] border border-rule bg-rule grid-cols-2 xl:grid-cols-4">
         {[
           ['Given', inr(total)],
           ['Donations', d.donations.length],
@@ -36,7 +36,7 @@ export default function UserDetail() {
             u.bharatId ? `${u.bharatId.number ?? '—'} · ${bharatState(u.bharatId)}` : 'Not linked',
           ],
         ].map(([k, v]) => (
-          <div key={k} className="bg-paper p-6">
+          <div key={k} className="min-w-0 bg-paper p-4 sm:p-6">
             <dt className="eyebrow">{k}</dt>
             <dd className="mt-3 text-xl">{v}</dd>
           </div>

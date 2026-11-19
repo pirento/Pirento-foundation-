@@ -29,7 +29,7 @@ export default function Overview() {
           </Notice>
         </div>
       )}
-      <dl className="grid gap-px overflow-hidden rounded-[22px] border border-rule bg-rule sm:grid-cols-2 xl:grid-cols-4">
+      <dl className="grid gap-px overflow-hidden rounded-[22px] border border-rule bg-rule grid-cols-2 xl:grid-cols-4">
         {[
           ['Raised (paid)', inr(s.raised)],
           ['Donations', s.donations],
@@ -40,7 +40,7 @@ export default function Overview() {
           ['Valid certificates', s.certificates],
           ['New messages', s.newMessages],
         ].map(([k, v]) => (
-          <div key={k} className="bg-paper p-6">
+          <div key={k} className="min-w-0 bg-paper p-4 sm:p-6">
             <dt className="eyebrow">{k}</dt>
             <dd className="big-num mt-3">{v}</dd>
           </div>

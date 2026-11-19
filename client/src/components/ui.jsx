@@ -28,7 +28,7 @@ export function Button({
     ref.current.style.translate = `${(e.clientX - r.left - r.width / 2) * 0.2}px ${(e.clientY - r.top - r.height / 2) * 0.3}px`;
   };
   const leave = () => ref.current && (ref.current.style.translate = '');
-  const cls = `group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full border px-6 py-3.5 text-[0.95rem] font-medium transition-[color,border-color,translate] duration-500 ease-ui disabled:opacity-50 disabled:pointer-events-none ${variants[variant]} ${className}`;
+  const cls = `group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full border px-6 py-3.5 text-[0.95rem] font-medium transition-[color,border-color,translate] duration-500 ease-ui disabled:pointer-events-none disabled:!border-rule disabled:!bg-stone disabled:!text-muted ${variants[variant]} ${className}`;
   const inner = (
     <>
       <span
