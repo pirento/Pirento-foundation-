@@ -119,6 +119,9 @@ h3,
   letter-spacing: 0.2em;
   color: var(--muted);
 }
+.inverse .bg-paper .eyebrow {
+  color: var(--muted); /* a paper card inside a dark panel goes back to normal label colour */
+}
 .inverse .eyebrow {
   color: var(--inverse-muted);
 }

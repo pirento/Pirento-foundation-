@@ -33,14 +33,14 @@ export default function Overview({ summary }) {
           </span>
         </div>
       )}
-      <dl className="grid gap-px overflow-hidden rounded-[22px] border border-rule bg-rule sm:grid-cols-2 xl:grid-cols-4">
+      <dl className="grid gap-px overflow-hidden rounded-[22px] border border-rule bg-rule grid-cols-2 xl:grid-cols-4">
         {[
           ['Total given', inr(totals.given)],
           [`This year (FY ${totals.fy})`, inr(totals.thisFy)],
           ['Monthly gift', totals.monthly ? `${inr(totals.monthly)}/mo` : '–'],
           ['Certificates', totals.certificates],
         ].map(([k, v]) => (
-          <div key={k} className="bg-paper p-6">
+          <div key={k} className="min-w-0 bg-paper p-4 sm:p-6">
             <dt className="eyebrow">{k}</dt>
             <dd className="big-num mt-3">{v}</dd>
           </div>
@@ -61,7 +61,10 @@ export default function Overview({ summary }) {
                   {c.label}
                 </span>
                 {!c.done && (
-                  <Link to={links[c.key]} className="text-sm underline underline-offset-4">
+                  <Link
+                    to={links[c.key]}
+                    className="shrink-0 whitespace-nowrap text-sm underline underline-offset-4"
+                  >
                     {c.key === 'bharat' ? 'Pending · complete now' : 'Do it'}
                   </Link>
                 )}

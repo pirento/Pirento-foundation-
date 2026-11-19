@@ -235,18 +235,57 @@ export const faqs = [
   },
 ];
 
+// The ten Pirento products, from "Pirento Ecosystem: Idea and Master Plan" (Oct 2026). The Foundation is not one
+// of them: it has its own charitable purpose and governance.
+export const products = [
+  {
+    key: 'legal',
+    name: 'Pirento Legal',
+    text: 'Choose and manage legal registrations and professional services.',
+  },
+  {
+    key: 'black',
+    name: 'Pirento Black',
+    text: 'Create editable documents and organise tax, bookkeeping and compliance.',
+  },
+  {
+    key: 'green',
+    name: 'Pirento Green',
+    text: 'Take part in tree programmes and approved environmental markets.',
+  },
+  { key: 'intern', name: 'Pirento Intern', text: 'Learn, practise and complete supervised real work.' },
+  { key: 'ai', name: 'Pirento AI', text: 'Understand information and prepare approved work.' },
+  {
+    key: 'vault',
+    name: 'Pirento Vault',
+    text: 'Protect private records and plan controlled nominee continuity.',
+  },
+  {
+    key: 'one',
+    name: 'Pirento One',
+    text: 'Help approved partners introduce and manage permitted services.',
+    link: 'pirentoOneUrl',
+  },
+  {
+    key: 'capital',
+    name: 'Pirento Capital',
+    text: 'Support approved credit, lending and recurring collections.',
+  },
+  {
+    key: 'bharatid',
+    name: 'Bharat ID by Pirento',
+    text: 'Your private Pirento account ID: verify identity and share specific evidence with consent. Not a government ID.',
+    link: 'bharatIdUrl',
+  },
+  {
+    key: 'giftox',
+    name: 'Giftox by Pirento',
+    text: 'Plan, choose and deliver thoughtful gifts for occasions.',
+  },
+];
+
 export const ecosystem = {
   site: { label: 'pirento.com', href: 'https://pirento.com', text: 'The main Pirento website.' },
-  bharatId: {
-    name: 'Bharat ID by Pirento',
-    tag: 'Private Pirento Account ID — Not a Government ID',
-    text: 'One private Pirento account ID for sign-in, profile and consent across Pirento services. Every Foundation member links one.',
-  },
-  pirentoOne: {
-    name: 'Pirento One',
-    tag: 'Partner network',
-    text: 'For professionals, agencies, institutions and community partners who want to introduce people and opportunities into the Pirento ecosystem, with the customer’s permission and clear responsibilities.',
-  },
   parent: {
     name: 'Venturecore Solutions Private Limited',
     meta: 'Sponsor company · CIN U63121UP2023PTC188021',

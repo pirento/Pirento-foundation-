@@ -9,6 +9,17 @@ gsap.registerPlugin(ScrollTrigger);
 export const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let lenis;
+// Late fonts and images change page height after the triggers were measured, which left lower sections
+// waiting for a scroll position that no longer exists (blank sections on phones). Re-measure when that happens.
+let refreshTimer;
+const refreshSoon = () => {
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 150);
+};
+document.fonts?.ready.then(refreshSoon);
+addEventListener('load', refreshSoon);
+new ResizeObserver(refreshSoon).observe(document.body);
+
 export function startSmoothScroll() {
   if (reducedMotion() || lenis) return;
   lenis = new Lenis({ duration: 1.1 });

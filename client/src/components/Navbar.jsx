@@ -13,7 +13,7 @@ export function Logo({ className = '' }) {
   return (
     <Link
       to="/"
-      className={`inline-flex items-center gap-2.5 whitespace-nowrap font-display text-[0.95rem] font-semibold uppercase tracking-[0.04em] ${className}`}
+      className={`inline-flex items-center gap-2 whitespace-nowrap font-display text-[0.8rem] font-semibold uppercase tracking-[0.04em] sm:gap-2.5 sm:text-[0.95rem] ${className}`}
     >
       <span aria-hidden className="size-2.5 rounded-[3px] bg-accent ring-1 ring-ink" />
       {brand.name}
@@ -50,7 +50,7 @@ function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}
-      className="relative grid size-10 place-items-center overflow-hidden rounded-full border border-rule transition-colors hover:border-ink"
+      className="relative grid size-9 place-items-center sm:size-10 overflow-hidden rounded-full border border-rule transition-colors hover:border-ink"
     >
       <Sun
         aria-hidden
@@ -196,10 +196,10 @@ export default function Navbar() {
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-[translate,background-color,border-color] duration-500 ease-ui ${hidden && !open ? '-translate-y-full' : ''} ${scrolled && !open ? 'border-b border-rule bg-paper/80 backdrop-blur-md' : 'border-b border-transparent'}`}
       >
-        <div className="container-x flex h-[68px] items-center justify-between gap-4">
+        <div className="container-x flex h-[68px] items-center justify-between gap-3">
           <Logo />
           <PillNav />
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <span className="mr-2 hidden items-center gap-2 rounded-full border border-rule px-3 py-1.5 text-xs 2xl:inline-flex">
               <span className="relative size-1.5 rounded-full bg-accent">
                 <span aria-hidden className="pulse absolute inset-0 rounded-full bg-accent" />
@@ -210,19 +210,22 @@ export default function Navbar() {
             <Link
               to={user ? (user.role === 'admin' ? '/admin' : '/dashboard') : '/login'}
               aria-label={user ? 'My account' : 'Log in'}
-              className="hidden size-10 place-items-center rounded-full border border-rule transition-colors hover:border-ink sm:grid"
+              className="grid size-9 place-items-center rounded-full border border-rule transition-colors hover:border-ink sm:size-10"
             >
               <UserRound aria-hidden className="size-4" />
             </Link>
-            <Button to="/donate" variant="accent" className="hidden !py-2.5 sm:inline-flex" cursor="Donate">
-              Donate
-            </Button>
+            {/* Wrapped so "hidden" can't lose to the button's own inline-flex; on phones Donate lives in the menu and hero. */}
+            <span className="hidden sm:block">
+              <Button to="/donate" variant="accent" className="!py-2.5" cursor="Donate">
+                Donate
+              </Button>
+            </span>
             <button
               onClick={() => setOpen((o) => !o)}
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? 'Close menu' : 'Open menu'}
-              className="grid size-10 place-items-center rounded-full border border-rule xl:hidden"
+              className="grid size-9 place-items-center rounded-full border border-rule sm:size-10 xl:hidden"
             >
               {open ? <X aria-hidden className="size-4" /> : <Menu aria-hidden className="size-4" />}
             </button>

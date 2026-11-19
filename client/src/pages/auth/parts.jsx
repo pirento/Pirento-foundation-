@@ -39,19 +39,32 @@ export function GoogleButton({ clientId, onCredential, text = 'continue_with' })
 }
 
 /** Bharat ID by Pirento and Google, above the code/password forms. */
+/** Bharat ID by Pirento (always offered) and Google (when configured), above the code/password forms. */
 export function Social({ cfg, next, onGoogle, signup }) {
-  if (!cfg.bharatId && !cfg.googleClientId) return null;
+  const [notReady, setNotReady] = useState(false);
+  const bharatHref = `/api/auth/bharatid/start?mode=login${next ? `&next=${encodeURIComponent(next)}` : ''}`;
   return (
     <>
       <div className="space-y-3">
-        {cfg.bharatId && (
-          <a
-            href={`/api/auth/bharatid/start?mode=login${next ? `&next=${encodeURIComponent(next)}` : ''}`}
-            className="flex h-11 w-full items-center justify-center gap-2.5 rounded-full bg-inverse text-sm font-medium text-on-inverse transition-opacity hover:opacity-90"
-          >
-            <Fingerprint aria-hidden className="size-4 text-accent" /> {signup ? 'Sign up' : 'Continue'} with
-            Bharat ID by Pirento
-          </a>
+        <a
+          href={bharatHref}
+          onClick={(e) => {
+            // Until the Bharat ID client is connected, explain here instead of bouncing through an error page.
+            if (!cfg.bharatId) {
+              e.preventDefault();
+              setNotReady(true);
+            }
+          }}
+          className="flex h-11 w-full items-center justify-center gap-2.5 rounded-full bg-inverse px-4 text-sm font-medium text-on-inverse transition-opacity hover:opacity-90"
+        >
+          <Fingerprint aria-hidden className="size-4 shrink-0 text-accent" />{' '}
+          {signup ? 'Sign up' : 'Continue'} with Bharat ID by Pirento
+        </a>
+        {notReady && (
+          <p role="status" className="rounded-[14px] bg-stone px-4 py-3 text-sm">
+            Bharat ID sign-in opens as soon as Bharat ID by Pirento is connected to this site. For now, use
+            your mobile number or email below.
+          </p>
         )}
         <GoogleButton
           clientId={cfg.googleClientId}
@@ -66,12 +79,11 @@ export function Social({ cfg, next, onGoogle, signup }) {
   );
 }
 
-export function ChannelSwitch({ value, onChange, sms }) {
+export function ChannelSwitch({ value, onChange }) {
   const opts = [
     ['phone', 'Mobile', Smartphone],
     ['email', 'Email', Mail],
-  ].filter(([k]) => k === 'email' || sms);
-  if (opts.length < 2) return null;
+  ];
   return (
     <div
       role="radiogroup"

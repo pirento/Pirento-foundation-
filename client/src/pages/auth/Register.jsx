@@ -141,15 +141,13 @@ export default function Register({ cfg, next }) {
           record={emailRec}
           setRecord={setEmailRec}
         />
-        {cfg.sms && (
-          <VerifyRow
-            channel="phone"
-            value={f.phone}
-            onValue={(v) => setF({ ...f, phone: v })}
-            record={phoneRec}
-            setRecord={setPhoneRec}
-          />
-        )}
+        <VerifyRow
+          channel="phone"
+          value={f.phone}
+          onValue={(v) => setF({ ...f, phone: v })}
+          record={phoneRec}
+          setRecord={setPhoneRec}
+        />
         <Field
           label="Set a password"
           name="password"
@@ -187,7 +185,7 @@ export default function Register({ cfg, next }) {
         </Button>
         {!emailRec.verified && (
           <p className="text-center text-xs text-muted">
-            Verify your email{cfg.sms ? ' (and mobile, if you add one)' : ''} to continue.
+            Verify your email (and mobile, if you add one) to continue.
           </p>
         )}
       </form>

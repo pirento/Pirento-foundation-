@@ -20,7 +20,7 @@ export default function SignIn({ cfg, next }) {
   const { signIn, setUser } = useAuth();
   const navigate = useNavigate();
   const [view, setView] = useState('code'); // code | password | reset
-  const [channel, setChannel] = useState(cfg.sms ? 'phone' : 'email');
+  const [channel, setChannel] = useState('phone');
   const [target, setTarget] = useState('');
   const [sent, setSent] = useState(null); // { target, devCode }
   const [password, setPassword] = useState('');
@@ -126,7 +126,7 @@ export default function SignIn({ cfg, next }) {
       )}
       {!sent ? (
         <form onSubmit={(e) => (e.preventDefault(), send(purpose))} className="space-y-5">
-          <ChannelSwitch value={channel} onChange={(c) => (setChannel(c), setTarget(''))} sms={cfg.sms} />
+          <ChannelSwitch value={channel} onChange={(c) => (setChannel(c), setTarget(''))} />
           <Field
             label={labelFor(channel)}
             name="target"

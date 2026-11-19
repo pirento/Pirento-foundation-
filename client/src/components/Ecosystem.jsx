@@ -1,17 +1,8 @@
 // "Pirento ecosystem" section: Venturecore → Pirento Foundation → programmes and future schools,
 // plus Bharat ID by Pirento, Pirento One and a link to pirento.com.
-import {
-  Building2,
-  HeartHandshake,
-  School,
-  GraduationCap,
-  ArrowUpRight,
-  Fingerprint,
-  Handshake,
-} from 'lucide-react';
+import { Building2, HeartHandshake, School, GraduationCap, ArrowUpRight } from 'lucide-react';
 import { useSettings } from '../lib/settings.jsx';
-import { Button } from './ui.jsx';
-import { ecosystem, programmes, futureNote } from '../data/site.js';
+import { ecosystem, programmes, products, futureNote } from '../data/site.js';
 import { SectionHeader, StatusBadge, Tag } from './ui.jsx';
 
 const Badge = ({ icon: Icon, accent }) => (
@@ -26,7 +17,7 @@ const Stem = () => <span aria-hidden className="mx-auto block h-10 w-px bg-ink/4
 
 /** Organisation tree: Venturecore → Pirento Foundation → programmes now + School / University later. */
 export default function Ecosystem({ n = 1 }) {
-  const { parent, foundation, future, site, bharatId, pirentoOne } = ecosystem;
+  const { parent, foundation, future, site } = ecosystem;
   const st = useSettings();
   return (
     <section id="ecosystem" className="scroll-mt-24 py-28 md:py-40">
@@ -111,40 +102,42 @@ export default function Ecosystem({ n = 1 }) {
           {futureNote}
         </p>
 
-        <div className="mt-16 grid gap-4 md:grid-cols-2">
-          {[
-            [bharatId, Fingerprint, st.bharatIdUrl, 'Create your Bharat ID'],
-            [pirentoOne, Handshake, st.pirentoOneUrl, 'Become a Pirento One partner'],
-          ].map(([item, Icon, href, cta]) => (
-            <div
-              key={item.name}
-              data-reveal
-              className="group flex flex-col justify-between gap-8 rounded-[22px] border border-rule p-7 transition-colors duration-500 hover:border-ink md:p-8"
-            >
-              <div>
-                <div className="flex items-center justify-between gap-3">
-                  <Badge icon={Icon} />
-                  <span className="rounded-full border border-rule px-3 py-1 text-xs">{item.tag}</span>
-                </div>
-                <h3 className="mt-6 text-2xl md:text-3xl">{item.name}</h3>
-                <p className="mt-3 leading-relaxed text-muted">{item.text}</p>
-              </div>
-              {href && (
-                <div>
-                  <Button
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    variant="outline"
-                    icon={ArrowUpRight}
-                  >
-                    {cta} <span className="sr-only">(opens in a new tab)</span>
-                  </Button>
-                </div>
-              )}
-            </div>
-          ))}
+        <div className="mt-20 grid gap-8 md:grid-cols-12 md:items-end">
+          <div className="md:col-span-8">
+            <p className="eyebrow">The Pirento ecosystem · {products.length} products</p>
+            <h3 className="h-item mt-4">One account, ten specialist products.</h3>
+          </div>
+          <p data-reveal className="max-w-sm text-muted md:col-span-4">
+            Pirento is the masterbrand. Pirento Foundation sits beside these products with its own charitable
+            purpose, governance and bank account.
+          </p>
         </div>
+        <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {products.map((p, i) => (
+            <li key={p.key} data-reveal>
+              <a
+                href={st[p.link] || st.pirentoUrl || site.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cursor="Visit"
+                className="group flex h-full flex-col gap-6 rounded-[18px] border border-rule p-5 transition-[border-color,translate] duration-500 ease-ui hover:-translate-y-1 hover:border-ink"
+              >
+                <span className="flex items-center justify-between text-sm tabular-nums text-muted">
+                  {String(i + 1).padStart(2, '0')}
+                  <ArrowUpRight
+                    aria-hidden
+                    className="size-4 transition-transform duration-500 group-hover:rotate-45"
+                  />
+                </span>
+                <span>
+                  <span className="block text-lg font-medium leading-tight">{p.name}</span>
+                  <span className="mt-2 block text-sm leading-relaxed text-muted">{p.text}</span>
+                  <span className="sr-only"> (opens in a new tab)</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
 
         <a
           data-reveal
