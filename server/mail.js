@@ -51,7 +51,7 @@ function layout({ preheader, title, body, cta }) {
   <tr><td style="background:${C.white};border:1px solid ${C.rule};border-top:none;border-radius:0 0 20px 20px;padding:20px 32px;${font}font-size:12px;line-height:1.6;color:${C.muted}">
     People. Planet. Possibility.<br>
     Questions? Write to <a href="mailto:${SUPPORT_EMAIL()}" style="color:${C.blue}">${SUPPORT_EMAIL()}</a> · <a href="${siteUrl()}" style="color:${C.blue}">${siteUrl().replace(/^https?:\/\//, '')}</a><br>
-    Pirento Foundation is a proposed Section 8 company sponsored by Venturecore Solutions Private Limited (CIN U63121UP2023PTC188021). Registration is pending; donations are not yet eligible for 80G tax exemption.
+    Pirento Foundation is a Section 8 company under the Companies Act, 2013, sponsored by Venturecore Solutions Private Limited (CIN U63121UP2023PTC188021), registered under sections 12A and 80G of the Income-tax Act.
   </td></tr>
 </table></td></tr></table></body></html>`;
 }
@@ -62,6 +62,7 @@ const rows = (pairs) =>
     .map(([k, v]) => `<tr><td style="padding:10px 16px;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:${C.muted};width:40%">${esc(k)}</td><td style="padding:10px 16px;font-size:15px;font-weight:bold;color:${C.ink}">${esc(v)}</td></tr>`)
     .join('')}</table>`;
 
+const PROGRAMME_LABEL = { general: 'where it is needed most', green: 'Pirento Green', food: 'Food & emergency relief', education: 'Pirento Education', health: 'Health & livelihood' };
 const PURPOSE = { login: 'sign in', register: 'verify your email', reset: 'reset your password', admin: 'finish signing in to the admin desk' };
 
 export const templates = {
@@ -89,9 +90,9 @@ export const templates = {
     }),
   }),
 
-  receipt: (d, certNo, programme) => ({
+  receipt: (d, certNo, programme, receiptLink) => ({
     subject: `Receipt ${d.receiptNo}: thank you for your gift of ${inr(d.amount)}`,
-    text: `Thank you, ${d.name}. We received ${inr(d.amount)} for ${programme}. Receipt ${d.receiptNo}. Certificate: ${siteUrl()}/api/certificates/${certNo}/pdf`,
+    text: `Thank you, ${d.name}. We received ${inr(d.amount)} for ${programme}. Receipt ${d.receiptNo}: ${receiptLink}${certNo ? `\nCertificate: ${siteUrl()}/api/certificates/${certNo}/pdf` : ''}`,
     html: layout({
       preheader: `We received ${inr(d.amount)}. Receipt ${d.receiptNo}.`,
       title: `Thank you, ${esc(d.name.split(' ')[0])}.`,
@@ -105,8 +106,67 @@ export const templates = {
           ['Date', new Date(d.paidAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })],
           ...(d.pan ? [['PAN', d.pan]] : []),
         ]) +
-        p(`<span style="font-size:13px;color:${C.muted}">Certificate no. ${esc(certNo)}. Anyone can verify it at ${siteUrl()}/verify. This acknowledgement is not an 80G tax-exemption receipt.</span>`),
-      cta: { label: 'Download certificate (PDF)', href: `${siteUrl()}/api/certificates/${certNo}/pdf` },
+        p(`<a href="${esc(receiptLink)}" style="color:${C.blue};font-weight:bold">Download your receipt (PDF)</a>. Keep it with your tax papers; the Form 10BE certificate for your 80G claim follows after we file Form 10BD.`) +
+        (d.subscription ? p(`<span style="font-size:13px;color:${C.muted}">This is part of your monthly gift. You can stop it any time from your dashboard.</span>`) : '') +
+        (certNo ? p(`<span style="font-size:13px;color:${C.muted}">Certificate no. ${esc(certNo)}. Anyone can verify it at ${siteUrl()}/verify.</span>`) : ''),
+      cta: certNo ? { label: 'Download certificate (PDF)', href: `${siteUrl()}/api/certificates/${certNo}/pdf` } : { label: 'Open my dashboard', href: `${siteUrl()}/dashboard` },
+    }),
+  }),
+
+  accountSetup: (user, link, days) => ({
+    subject: 'Your Pirento Foundation account is ready',
+    text: `Hi ${user.name}, we created an account for you so your receipts stay in one place.\nUser ID: ${user.email}\nSet your password (link valid ${days} days): ${link}`,
+    html: layout({
+      preheader: 'Set your password to open your dashboard.',
+      title: 'Your account is ready.',
+      body:
+        p(`Hi ${esc(user.name.split(' ')[0])}, thank you for giving. We created an account for you so every receipt, 80G document and certificate stays in one place.`) +
+        rows([['User ID', user.email]]) +
+        p(`Choose your own password with the button below. For your safety we never send passwords by email. The link works for ${days} days; after that, use “Forgot password” on the sign-in page.`),
+      cta: { label: 'Set my password', href: link },
+    }),
+  }),
+
+  membership: (m, user, certLink, needsBharatId) => ({
+    subject: `Welcome, member ${m.memberNo}`,
+    text: `Hi ${user.name}, you are now a member of Pirento Foundation. Member no. ${m.memberNo}. Certificate: ${certLink}${needsBharatId ? '\nNext step: complete your Bharat ID by Pirento from your dashboard.' : ''}`,
+    html: layout({
+      preheader: `Member no. ${m.memberNo}`,
+      title: 'Welcome to the Foundation.',
+      body:
+        p(`Hi ${esc(user.name.split(' ')[0])}, you are now a Pirento Foundation member. Thank you for standing with us.`) +
+        rows([
+          ['Member no.', m.memberNo],
+          ['Valid until', m.validTo ? new Date(m.validTo).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }) : 'Lifetime'],
+          ['Fee receipt', m.receiptNo],
+        ]) +
+        (needsBharatId
+          ? p(`<strong>One step left:</strong> link your Bharat ID by Pirento from your dashboard. It is your private Pirento account ID (not a government ID) and will show on your membership card once complete.`)
+          : '') +
+        p(`<a href="${esc(certLink)}" style="color:${C.blue};font-weight:bold">Download your membership certificate (PDF)</a>`),
+      cta: { label: 'Open my dashboard', href: `${siteUrl()}/dashboard/membership` },
+    }),
+  }),
+
+  subscriptionStarted: (s) => ({
+    subject: `Your monthly gift of ${inr(s.amount)} has started`,
+    text: `Thank you, ${s.name}. Your monthly gift of ${inr(s.amount)} has started. You will get a receipt every month and can stop it any time from your dashboard.`,
+    html: layout({
+      preheader: 'A receipt arrives every month.',
+      title: 'Your monthly gift has started.',
+      body: p(`Thank you, ${esc(s.name.split(' ')[0])}. ${inr(s.amount)} will be given every month to ${esc(PROGRAMME_LABEL[s.programme] ?? s.programme)}. You will receive a receipt after each payment.`) + p('You can stop it any time from your dashboard; it ends before the next charge.'),
+      cta: { label: 'Manage monthly gift', href: `${siteUrl()}/dashboard/monthly` },
+    }),
+  }),
+
+  subscriptionCancelled: (s) => ({
+    subject: 'Your monthly gift has been stopped',
+    text: `Hi ${s.name}, your monthly gift of ${inr(s.amount)} has been stopped. No further charges will be made.`,
+    html: layout({
+      preheader: 'No further charges will be made.',
+      title: 'Monthly gift stopped.',
+      body: p(`Hi ${esc(s.name.split(' ')[0])}, your monthly gift of ${inr(s.amount)} has been stopped. No further charges will be made. Thank you for every month you gave.`),
+      cta: { label: 'Open my dashboard', href: `${siteUrl()}/dashboard` },
     }),
   }),
 

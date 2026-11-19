@@ -2,14 +2,18 @@ import { Link } from 'react-router';
 import { ArrowUp } from 'lucide-react';
 import { brand, nav, socials, legalLinks } from '../data/site.js';
 import { scrollToTop } from '../lib/motion.js';
+import { useSettings } from '../lib/settings.jsx';
 
 const more = [
   { to: '/donate', label: 'Donate' },
+  { to: '/updates', label: 'Updates' },
   { to: '/dashboard', label: 'My account' },
   { to: '/verify', label: 'Verify a certificate' },
 ];
 
 export default function Footer() {
+  const st = useSettings();
+  const regs = [st.cin && `CIN ${st.cin}`, st.reg12A && `12A ${st.reg12A}`, st.reg80G && `80G ${st.reg80G}`, st.csr1 && `CSR-1 ${st.csr1}`, st.fcra && `FCRA ${st.fcra}`].filter(Boolean);
   return (
     <footer className="inverse bg-inverse text-on-inverse">
       <div className="container-x pt-24">
@@ -55,11 +59,12 @@ export default function Footer() {
         </svg>
         <div className="flex flex-col gap-2 py-8 text-xs leading-relaxed text-inverse-muted md:flex-row md:justify-between">
           <p>
-            © {new Date().getFullYear()} {brand.name} · {brand.legalForm}. An initiative of {brand.sponsor}, CIN {brand.sponsorCin}.
+            © {new Date().getFullYear()} {brand.name}, a Section 8 company. An initiative of {brand.sponsor} (CIN {brand.sponsorCin}).
+            {regs.length > 0 && <><br />{regs.join(' · ')}</>}
           </p>
           <p className="flex flex-wrap gap-x-4 gap-y-1">
             {legalLinks.map((l) => <Link key={l.to} to={l.to} className="underline-offset-4 hover:text-on-inverse hover:underline">{l.label}</Link>)}
-            <span>Not yet eligible for 80G.</span>
+            <span>Donations eligible under 80G.</span>
           </p>
         </div>
       </div>

@@ -5,6 +5,8 @@ import rateLimit from 'express-rate-limit';
 import { User, Otp } from './models.js';
 import { httpError, normTarget, normPhone, createOtp, checkOtp, deliver, canEmail, canSms, devCodes } from './otp.js';
 import { notify, templates } from './mail.js';
+import { userForSetupToken } from './accounts.js';
+import { bharatIdOn } from './bharatid.js';
 
 const COOKIE = 'pf_token';
 const secret = () => process.env.JWT_SECRET;
@@ -20,9 +22,13 @@ export const publicUser = (u) => ({
   phoneVerified: u.phoneVerified,
   hasPassword: Boolean(u.passwordHash),
   google: Boolean(u.googleId),
+  address: u.address,
+  pan: u.pan,
+  bharatId: u.bharatId?.sub ? { number: u.bharatId.number, status: u.bharatId.status, name: u.bharatId.name, email: u.bharatId.email, phone: u.bharatId.phone, linkedAt: u.bharatId.linkedAt, checkedAt: u.bharatId.checkedAt } : null,
+  createdAt: u.createdAt,
 });
 
-function setSession(res, user) {
+export function setSession(res, user, respond = true) {
   const hours = user.role === 'admin' ? 12 : 7 * 24; // admin sessions are short
   const token = jwt.sign({ sub: String(user._id), role: user.role }, secret(), { expiresIn: `${hours}h` });
   res.cookie(COOKIE, token, {
@@ -31,7 +37,7 @@ function setSession(res, user) {
     secure: process.env.NODE_ENV === 'production',
     maxAge: hours * 3600 * 1000,
   });
-  return res.json({ user: publicUser(user) });
+  if (respond) return res.json({ user: publicUser(user) });
 }
 
 // Attaches req.user when a valid session cookie exists; never rejects.
@@ -66,7 +72,7 @@ const limiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders
 const sendLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false, message: { error: 'Too many codes requested. Please try again in 15 minutes.' } });
 
 router.get('/config', (_req, res) =>
-  res.json({ googleClientId: process.env.GOOGLE_CLIENT_ID || null, email: canEmail() || devCodes(), sms: canSms() || devCodes(), devCodes: devCodes() }),
+  res.json({ googleClientId: process.env.GOOGLE_CLIENT_ID || null, bharatId: bharatIdOn(), email: canEmail() || devCodes(), sms: canSms() || devCodes(), devCodes: devCodes() }),
 );
 
 /** Step 1 of any code flow: purpose = login | register | reset. */
@@ -152,6 +158,18 @@ router.post('/password/reset', limiter, async (req, res) => {
   await otp.deleteOne();
   // An admin still has to pass the two-step admin login after a reset.
   if (user.role === 'admin') return res.json({ user: null, admin: true });
+  setSession(res, user);
+});
+
+/** Set a password from the one-time link emailed when an account was created during a donation. */
+router.post('/password/set', limiter, async (req, res) => {
+  const { token, password } = req.body ?? {};
+  checkPassword(password);
+  const user = await userForSetupToken(token);
+  if (!user) throw httpError(400, 'This link has expired or was already used. Use “Forgot password” to get a new code.');
+  notAdmin(user);
+  Object.assign(user, { passwordHash: await bcrypt.hash(password, 12), emailVerified: true, setupTokenHash: undefined, setupTokenExpires: undefined });
+  await user.save();
   setSession(res, user);
 });
 

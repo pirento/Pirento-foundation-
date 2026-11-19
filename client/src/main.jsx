@@ -7,13 +7,16 @@ import '@fontsource/anton';
 import './index.css';
 import App from './App.jsx';
 import { AuthProvider } from './lib/auth.jsx';
+import { SettingsProvider } from './lib/settings.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <SettingsProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </SettingsProvider>
     </BrowserRouter>
   </StrictMode>,
 );

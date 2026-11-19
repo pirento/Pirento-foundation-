@@ -1,7 +1,10 @@
 import { Router } from 'express';
-import { Donation, Certificate, User, Message } from './models.js';
+import { Donation, Certificate, User, Message, Membership, Subscription, Post, PROGRAMMES } from './models.js';
 import { requireAdmin, isEmail, publicUser } from './auth.js';
-import { checkDonor, markPaid, sendReceipt } from './donations.js';
+import { checkDonor, markPaid, sendReceipt, donorInput } from './donations.js';
+import { activateMembership, currentMembership } from './membership.js';
+import { getSettings } from './settings.js';
+import { httpError } from './otp.js';
 import { issueCertificate } from './certificates.js';
 import { notify, templates } from './mail.js';
 
@@ -15,35 +18,36 @@ router.get('/stats', async (_req, res) => {
     User.countDocuments(),
     Certificate.countDocuments({ revoked: false }),
   ]);
-  const newMessages = await Message.countDocuments({ status: 'new' });
+  const now = new Date();
+  const [newMessages, members, monthly] = await Promise.all([
+    Message.countDocuments({ status: 'new' }),
+    Membership.distinct('user', { status: 'active', $or: [{ validTo: null }, { validTo: { $gt: now } }] }),
+    Subscription.aggregate([{ $match: { status: 'active' } }, { $group: { _id: null, n: { $sum: 1 }, amount: { $sum: '$amount' } } }]),
+  ]);
   const t = totals[0] ?? { raised: 0, count: 0, donors: [] };
-  res.json({ raised: t.raised, donations: t.count, donors: t.donors.length, users, certificates, byProgramme, newMessages });
+  res.json({ raised: t.raised, donations: t.count, donors: t.donors.length, users, certificates, byProgramme, newMessages, members: members.length, monthlyDonors: monthly[0]?.n ?? 0, monthlyAmount: monthly[0]?.amount ?? 0 });
 });
 
 router.get('/donations', async (req, res) => {
-  const filter = ['created', 'paid', 'failed'].includes(req.query.status) ? { status: req.query.status } : {};
+  const filter = ['created', 'paid', 'failed', 'refunded'].includes(req.query.status) ? { status: req.query.status } : {};
+  const q = typeof req.query.q === 'string' ? req.query.q.trim().slice(0, 60) : '';
+  if (q) {
+    const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    filter.$or = [{ name: rx }, { email: rx }, { receiptNo: rx }, { paymentId: rx }];
+  }
   res.json({ donations: await Donation.find(filter).sort({ createdAt: -1 }).limit(500).lean() });
 });
 
 // Records an offline gift (bank transfer, UPI, cash, cheque) and issues its acknowledgement.
 router.post('/donations', async (req, res) => {
-  const b = req.body ?? {};
-  const input = { ...b, amount: Number(b.amount), programme: b.programme || 'general', pan: b.pan || undefined };
+  const input = donorInput(req.body);
   const err = checkDonor(input);
   if (err) return res.status(400).json({ error: err });
-  if (!['bank', 'upi', 'cash', 'cheque'].includes(input.method)) return res.status(400).json({ error: 'Choose a payment mode.' });
+  const method = req.body?.method;
+  if (!['bank', 'upi', 'cash', 'cheque'].includes(method)) return res.status(400).json({ error: 'Choose a payment mode.' });
   const user = await User.findOne({ email: input.email.toLowerCase() });
-  const donation = new Donation({
-    user: user?._id,
-    name: input.name,
-    email: input.email,
-    phone: input.phone,
-    pan: input.pan,
-    amount: input.amount,
-    programme: input.programme,
-    reference: input.reference,
-  });
-  const cert = await markPaid(donation, { method: input.method });
+  const donation = new Donation({ ...input, user: user?._id, reference: req.body?.reference?.trim() || undefined });
+  const cert = await markPaid(donation, { method });
   res.status(201).json({ donation, certNo: cert.certNo });
 });
 
@@ -80,8 +84,98 @@ router.patch('/messages/:id', async (req, res) => {
   res.json({ message: m });
 });
 
+// Refund: the money goes back through Razorpay's dashboard; this records it and revokes the certificate.
+router.patch('/donations/:id', async (req, res) => {
+  if (req.body?.status !== 'refunded') throw httpError(400, 'Only refunds can be recorded here.');
+  const d = /^[0-9a-f]{24}$/.test(req.params.id) ? await Donation.findOneAndUpdate({ _id: req.params.id, status: 'paid' }, { status: 'refunded' }, { returnDocument: 'after' }) : null;
+  if (!d) return res.status(404).json({ error: 'Paid donation not found.' });
+  await Certificate.updateMany({ donation: d._id }, { revoked: true });
+  res.json({ donation: d });
+});
+
+router.get('/subscriptions', async (_req, res) => {
+  res.json({ subscriptions: await Subscription.find({ status: { $ne: 'created' } }).sort({ createdAt: -1 }).limit(500).lean() });
+});
+
+/* ---------- members ---------- */
+
+router.get('/members', async (_req, res) => {
+  const list = await Membership.find({ status: { $ne: 'created' } }).sort({ createdAt: -1 }).limit(1000).populate('user', 'name email phone bharatId').lean();
+  res.json({ members: list.map((m) => ({ ...m, user: m.user && { ...m.user, bharatId: m.user.bharatId?.sub ? { number: m.user.bharatId.number, status: m.user.bharatId.status } : null } })) });
+});
+
+// Offline membership (fee paid by cash, UPI or bank). The person needs an account first.
+router.post('/members', async (req, res) => {
+  const { email, method, reference } = req.body ?? {};
+  const user = typeof email === 'string' ? await User.findOne({ email: email.toLowerCase().trim(), role: 'user' }) : null;
+  if (!user) throw httpError(404, 'No donor account with this email. Ask them to create one first.');
+  if (!['bank', 'upi', 'cash', 'cheque'].includes(method)) throw httpError(400, 'Choose a payment mode.');
+  const running = await currentMembership(user._id);
+  if (running && (running.validTo === null || running.validTo - Date.now() > 30 * 86400_000)) throw httpError(409, 'This person already has an active membership.');
+  const { membershipFee } = await getSettings();
+  const m = new Membership({ user: user._id, fee: membershipFee, method, reference: reference?.trim() || undefined });
+  res.status(201).json({ membership: await activateMembership(m, {}) });
+});
+
+router.patch('/members/:id', async (req, res) => {
+  const m = /^[0-9a-f]{24}$/.test(req.params.id) ? await Membership.findByIdAndUpdate(req.params.id, { status: 'cancelled' }, { returnDocument: 'after' }) : null;
+  if (!m) return res.status(404).json({ error: 'Not found.' });
+  if (m.certNo) await Certificate.updateOne({ certNo: m.certNo }, { revoked: true });
+  res.json({ membership: m });
+});
+
+/* ---------- website updates (news from the field) ---------- */
+
+const slugify = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 80) || 'update';
+function postInput(b = {}) {
+  const title = String(b.title ?? '').trim();
+  if (!title || title.length > 140) throw httpError(400, 'Title is required (up to 140 characters).');
+  if (b.link && !/^https:\/\/\S+$/.test(b.link)) throw httpError(400, 'Link must start with https://');
+  if (b.programme && !PROGRAMMES.includes(b.programme)) throw httpError(400, 'Unknown programme.');
+  return { title, summary: String(b.summary ?? '').slice(0, 300), body: String(b.body ?? '').slice(0, 20000), programme: b.programme || '', link: b.link || undefined, published: Boolean(b.published) };
+}
+
+router.get('/posts', async (_req, res) => res.json({ posts: await Post.find().sort({ createdAt: -1 }).lean() }));
+router.post('/posts', async (req, res) => {
+  const data = postInput(req.body);
+  let slug = slugify(data.title);
+  if (await Post.exists({ slug })) slug = `${slug}-${Date.now().toString(36)}`;
+  res.status(201).json({ post: await Post.create({ ...data, slug, publishedAt: data.published ? new Date() : undefined }) });
+});
+router.put('/posts/:id', async (req, res) => {
+  const post = /^[0-9a-f]{24}$/.test(req.params.id) ? await Post.findById(req.params.id) : null;
+  if (!post) return res.status(404).json({ error: 'Not found.' });
+  const data = postInput(req.body);
+  if (data.published && !post.published) post.publishedAt = new Date();
+  Object.assign(post, data);
+  await post.save();
+  res.json({ post });
+});
+router.delete('/posts/:id', async (req, res) => {
+  await Post.deleteOne({ _id: /^[0-9a-f]{24}$/.test(req.params.id) ? req.params.id : null });
+  res.json({ ok: true });
+});
+
+/* ---------- people ---------- */
+
+router.get('/users/:id', async (req, res) => {
+  const user = /^[0-9a-f]{24}$/.test(req.params.id) ? await User.findById(req.params.id) : null;
+  if (!user) return res.status(404).json({ error: 'Not found.' });
+  const or = [{ user: user._id }, { email: user.email }];
+  const [donations, memberships, subscriptions, certificates] = await Promise.all([
+    Donation.find({ $or: or, status: { $ne: 'created' } }).sort({ createdAt: -1 }).lean(),
+    Membership.find({ user: user._id, status: { $ne: 'created' } }).sort({ createdAt: -1 }).lean(),
+    Subscription.find({ $or: or, status: { $ne: 'created' } }).lean(),
+    Certificate.find({ $or: or }).sort({ createdAt: -1 }).lean(),
+  ]);
+  res.json({ user: { ...publicUser(user), createdAt: user.createdAt }, donations, memberships, subscriptions, certificates });
+});
+
 router.get('/users', async (_req, res) => {
-  res.json({ users: (await User.find().sort({ createdAt: -1 }).limit(500)).map((u) => ({ ...publicUser(u), createdAt: u.createdAt })) });
+  const q = typeof _req.query.q === 'string' ? _req.query.q.trim().slice(0, 60) : '';
+  const rx = q && new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  const users = await User.find(rx ? { $or: [{ name: rx }, { email: rx }, { phone: rx }, { 'bharatId.number': rx }] } : {}).sort({ createdAt: -1 }).limit(500);
+  res.json({ users: users.map((u) => ({ ...publicUser(u), createdAt: u.createdAt })) });
 });
 
 router.get('/certificates', async (_req, res) => {

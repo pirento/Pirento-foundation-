@@ -18,6 +18,9 @@ import Auth from './pages/Auth.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import { AdminShell, AdminLogin } from './pages/Admin.jsx';
 import Policy from './pages/Policy.jsx';
+import Membership from './pages/Membership.jsx';
+import SetPassword from './pages/SetPassword.jsx';
+import Updates from './pages/Updates.jsx';
 import Ecosystem from './components/Ecosystem.jsx';
 
 function NotFound() {
@@ -77,7 +80,11 @@ export default function App() {
         <Route path="/verify/:certNo" element={<Verify />} />
         <Route path="/login" element={<Auth mode="login" />} />
         <Route path="/register" element={<Auth mode="register" />} />
-        <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+        <Route path="/dashboard/*" element={<RequireAuth><Dashboard /></RequireAuth>} />
+        <Route path="/membership" element={<Membership />} />
+        <Route path="/set-password" element={<SetPassword />} />
+        <Route path="/updates" element={<Updates />} />
+        <Route path="/updates/:slug" element={<Updates />} />
         <Route path="/terms" element={<Policy slug="terms" key="terms" />} />
         <Route path="/privacy" element={<Policy slug="privacy" key="privacy" />} />
         <Route path="/refund-policy" element={<Policy slug="refund-policy" key="refund" />} />

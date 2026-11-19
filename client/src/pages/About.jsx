@@ -2,7 +2,8 @@ import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import Page, { PageHero } from '../components/Page.jsx';
 import { SectionHeader, StatusBadge, Label, Lines } from '../components/ui.jsx';
-import { brand, vision, mission, board, governance, registrations, roadmap, futureNote } from '../data/site.js';
+import { brand, vision, mission, board, governance, roadmap, futureNote } from '../data/site.js';
+import { useSettings, registrationList } from '../lib/settings.jsx';
 import { FinalCta } from './Home.jsx';
 import { reducedMotion } from '../lib/motion.js';
 
@@ -37,12 +38,13 @@ export function Timeline({ items }) {
 }
 
 export default function About() {
+  const st = useSettings();
   return (
     <Page title="About" description="Who runs Pirento Foundation, how it is governed, and where it stands on registration.">
       <PageHero
         label="About the Foundation"
         lines={['The social-impact arm', 'of Venturecore.']}
-        intro={`${brand.name} is the charitable arm of ${brand.sponsor}. Venturecore gives the initial corpus and brand licence, and its directors form the first board, but the Foundation keeps its own bank account, books and decisions.`}
+        intro={`${brand.name} is the charitable arm of ${brand.sponsor}: a Section 8 company registered under 12A and 80G, with CSR-1 and FCRA registration. Venturecore gives the corpus and brand licence, and its directors sit on the board, but the Foundation keeps its own bank account, books and decisions.`}
       />
 
       <section className="border-t border-rule py-28 md:py-40">
@@ -58,7 +60,7 @@ export default function About() {
 
       <section className="inverse bg-inverse py-28 text-on-inverse md:py-40">
         <div className="container-x">
-          <SectionHeader n={1} label="Founding board" inverse lines={['The people', 'accountable for it.']} intro="The directors of Venturecore form the first board. Offices are proposed and will be confirmed before incorporation. We also plan to add one independent member from outside the company." />
+          <SectionHeader n={1} label="Founding board" inverse lines={['The people', 'accountable for it.']} intro="The directors of Venturecore form the Foundation’s board. We also plan to add one independent member from outside the company." />
           <ul className="mt-16 grid gap-4 md:grid-cols-3">
             {board.map((b) => (
               <li key={b.name} data-reveal className="rounded-[22px] border border-inverse-rule p-7">
@@ -93,14 +95,17 @@ export default function About() {
         <div className="container-x grid gap-12 md:grid-cols-12">
           <div className="md:col-span-4">
             <Label n={3}>Registration</Label>
-            <Lines lines={['Where we stand,', 'honestly.']} className="h-section mt-6" />
-            <p data-reveal className="prose-body mt-6">{brand.pendingNote}</p>
+            <Lines lines={['Registered.', 'Accountable.']} className="h-section mt-6" />
+            <p data-reveal className="prose-body mt-6">{brand.taxNote}</p>
           </div>
           <ul className="md:col-span-8">
-            {registrations.map((r) => (
-              <li key={r.name} data-reveal className="flex items-center justify-between gap-4 border-b border-rule py-5 first:border-t">
+            {registrationList(st).map((r) => (
+              <li key={r.name} data-reveal className="flex flex-wrap items-center justify-between gap-4 border-b border-rule py-5 first:border-t">
                 <span className="text-lg">{r.name}</span>
-                <StatusBadge status={r.status} />
+                <span className="flex items-center gap-3">
+                  {r.number && <span className="font-mono text-sm text-muted">{r.number}</span>}
+                  <StatusBadge status="Done" />
+                </span>
               </li>
             ))}
           </ul>

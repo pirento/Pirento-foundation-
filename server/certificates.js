@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import crypto from 'node:crypto';
-import { Certificate, Donation, User } from './models.js';
+import { Certificate, Donation, User, Membership } from './models.js';
 import { renderCertificate } from './pdf.js';
 import { requireUser } from './auth.js';
 import { siteUrl } from './mail.js';
+import { getSettings } from './settings.js';
 
 // 16 hex chars = 64 bits: the number doubles as an unguessable link to the PDF.
 export const newCertNo = () => `PFC-${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
@@ -47,8 +48,11 @@ router.get('/:certNo/pdf', async (req, res) => {
   if (!c) return res.status(404).json({ error: 'Certificate not found.' });
   if (c.revoked) return res.status(410).json({ error: 'This certificate has been revoked.' });
   const donation = c.donation ? await Donation.findById(c.donation) : null;
+  const membership = c.kind === 'membership' ? await Membership.findOne({ certNo: c.certNo }) : null;
+  const user = membership ? await User.findById(membership.user) : null;
+  const settings = await getSettings();
   res.type('application/pdf').set('Content-Disposition', `inline; filename="${c.certNo}.pdf"`);
-  renderCertificate(c, donation, `${siteUrl()}/verify/${c.certNo}`, res);
+  renderCertificate(c, { donation, membership, user, settings, verifyUrl: `${siteUrl()}/verify/${c.certNo}` }, res);
 });
 
 export default router;

@@ -7,6 +7,11 @@ import donationRoutes from './donations.js';
 import certificateRoutes from './certificates.js';
 import adminRoutes from './admin.js';
 import contactRoutes from './contact.js';
+import membershipRoutes from './membership.js';
+import bharatIdRoutes from './bharatid.js';
+import meRoutes from './me.js';
+import postRoutes from './posts.js';
+import settingsRoutes from './settings.js';
 
 export function createApp() {
   const app = express();
@@ -18,11 +23,16 @@ export function createApp() {
   app.use(loadUser);
 
   app.get('/api/health', (_req, res) => res.json({ ok: true }));
+  app.use('/api/auth/bharatid', bharatIdRoutes);
   app.use('/api/auth', authRoutes);
   app.use('/api/donations', donationRoutes);
   app.use('/api/certificates', certificateRoutes);
   app.use('/api/admin', adminRoutes);
   app.use('/api/contact', contactRoutes);
+  app.use('/api/membership', membershipRoutes);
+  app.use('/api/me', meRoutes);
+  app.use('/api/posts', postRoutes);
+  app.use('/api/settings', settingsRoutes);
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found.' }));
 
   // In production the built React app is served by the same server.

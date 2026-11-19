@@ -1,28 +1,29 @@
-// All public text lives here. Source: "Pirento Foundation — Profile, Work Plan & Governance" (Oct 2026).
+// All public text lives here. Registration numbers, fees and partner links come from admin Settings (/api/settings).
 
 export const brand = {
   name: 'Pirento Foundation',
   tagline: 'People. Planet. Possibility.',
   status: 'Donations open',
-  legalForm: 'Section 8 company (registration pending)',
+  legalForm: 'Section 8 company',
+  registrationsLine: 'Section 8 · 12A · 80G · CSR-1 · FCRA',
   sponsor: 'Venturecore Solutions Private Limited',
   sponsorCin: 'U63121UP2023PTC188021',
   email: 'support@pirentofoundation.org',
   domain: 'pirentofoundation.org',
   phone: '+91 9988556861',
   contactNote: 'Phone number to be confirmed.',
-  office: 'C/o Sanjay Kumar, Village Mudila, Post Sihari Sardaha, Bhanpur, Basti, Uttar Pradesh 272190 (proposed)',
+  office: 'C/o Sanjay Kumar, Village Mudila, Post Sihari Sardaha, Bhanpur, Basti, Uttar Pradesh 272190',
   area: 'Basti and eastern Uttar Pradesh first; Lucknow and wider India later.',
-  pendingNote:
-    'Registration is pending. Until registration and 80G approval arrive, donations are not eligible for tax exemption.',
+  taxNote:
+    'Donations are eligible for deduction under section 80G of the Income-tax Act, subject to its limits. Add your PAN and address to get an 80G receipt; cash gifts above ₹2,000 are not deductible.',
 };
 
 export const nav = [
   { to: '/', label: 'Home' },
   { to: '/about', label: 'About' },
   { to: '/programmes', label: 'Programmes' },
+  { to: '/membership', label: 'Membership' },
   { to: '/ecosystem', label: 'Ecosystem' },
-  { to: '/verify', label: 'Verify' },
   { to: '/contact', label: 'Contact' },
 ];
 
@@ -128,31 +129,35 @@ export const governance = [
   { title: 'Policies first', text: 'Finance and procurement, conflict of interest, child protection, food safety, grievance and whistle-blowing.' },
 ];
 
-export const registrations = [
-  { name: 'Section 8 incorporation', status: 'Expected' },
-  { name: 'PAN and bank account', status: 'Expected' },
-  { name: '12A and 80G (Income Tax Act)', status: 'Expected' },
-  { name: 'NGO Darpan', status: 'Expected' },
-  { name: 'CSR-1 (to receive CSR funds)', status: 'Expected' },
-];
-
 export const donateSteps = [
   { title: 'Choose a cause', text: 'Pick a programme, or let us use it where it is needed most.' },
-  { title: 'Pay securely', text: 'UPI, cards or net banking through Razorpay. We never see your card details.' },
-  { title: 'Get your acknowledgement', text: 'A numbered receipt and a certificate you can download and verify online.' },
+  { title: 'Pay securely', text: 'UPI, cards or net banking through Razorpay, once or every month. No login needed.' },
+  { title: 'Get your 80G receipt', text: 'A numbered 80G receipt, a certificate you can verify, and an account to keep them all.' },
 ];
 
 export const faqs = [
-  { q: 'Is my donation tax-exempt?', a: 'Not yet. Registration and 80G approval are pending, so we cannot promise tax exemption. We will say so clearly on this site once approval arrives.' },
-  { q: 'Can I choose where my money goes?', a: 'Yes. Pick a programme on the donation form. Restricted donations are spent only on their stated purpose.' },
-  { q: 'Do I need an account to donate?', a: 'No. An account just keeps all your receipts and certificates in one place.' },
+  { q: 'Is my donation tax-deductible?', a: 'Yes. Pirento Foundation is registered under sections 12A and 80G of the Income-tax Act. Add your PAN and address on the form and your receipt carries the 80G particulars. We file Form 10BD and you receive Form 10BE, which is what you use to claim the deduction. Cash gifts above ₹2,000 are not deductible.' },
+  { q: 'Do I need an account to donate?', a: 'No. Just fill the form and pay. We create an account for you automatically and email a link to set your password, so all your receipts stay in one place.' },
+  { q: 'How does monthly giving work?', a: 'Choose “Monthly”, pick an amount from ₹100 and approve the mandate in Razorpay. You get a receipt every month and can stop any time from your dashboard; it ends before the next charge.' },
+  { q: 'Can I choose where my money goes?', a: 'Yes. Pick a programme on the form. Restricted donations are spent only on their stated purpose.' },
+  { q: 'Can companies give CSR funds?', a: 'Yes. We are registered for CSR (Form CSR-1). Write to us for our registration details and a CSR proposal.' },
+  { q: 'Can I give from outside India?', a: 'We hold FCRA registration, but foreign contributions must go only to our designated FCRA bank account and cannot be taken through this form. Please write to us for the details.' },
   { q: 'How do I check a certificate is real?', a: 'Every certificate has a number. Enter it on the Verify page to see who it was issued to and whether it is still valid.' },
-  { q: 'Can I give by bank transfer?', a: 'Yes. Write to us and we will share the Foundation’s bank details once the account is open, then record your gift and send your certificate.' },
   { q: 'Can I get a refund?', a: 'Donations are normally final, but we refund duplicate charges, wrong amounts and unauthorised payments. See our Refund & Cancellation Policy.' },
 ];
 
 export const ecosystem = {
   site: { label: 'pirento.com', href: 'https://pirento.com', text: 'The main Pirento website.' },
+  bharatId: {
+    name: 'Bharat ID by Pirento',
+    tag: 'Private Pirento Account ID — Not a Government ID',
+    text: 'One private Pirento account ID for sign-in, profile and consent across Pirento services. Every Foundation member links one.',
+  },
+  pirentoOne: {
+    name: 'Pirento One',
+    tag: 'Partner network',
+    text: 'For professionals, agencies, institutions and community partners who want to introduce people and opportunities into the Pirento ecosystem, with the customer’s permission and clear responsibilities.',
+  },
   parent: {
     name: 'Venturecore Solutions Private Limited',
     meta: 'Sponsor company · CIN U63121UP2023PTC188021',
@@ -160,7 +165,7 @@ export const ecosystem = {
   },
   foundation: {
     name: 'Pirento Foundation',
-    meta: 'Section 8 company · registration pending',
+    meta: 'Section 8 company · 12A · 80G · CSR-1 · FCRA',
     text: 'The charitable arm. Its own bank account, its own books, its own decisions. You are on its website.',
   },
   future: [
@@ -185,3 +190,26 @@ export const legalLinks = [
   { to: '/refund-policy', label: 'Refund & Cancellation' },
 ];
 export const contactTopics = ['Partnership', 'CSR support', 'Volunteering', 'Donation or receipt', 'Privacy or data request', 'Grievance', 'Other'];
+
+export const membership = {
+  benefits: [
+    { title: 'Your membership certificate', text: 'A numbered certificate and member card, verifiable online by anyone.' },
+    { title: 'A place in the work', text: 'First invitations to plantation drives, relief camps and volunteer days in Basti and beyond.' },
+    { title: 'Updates from the field', text: 'Programme reports, survival counts and fund-use summaries, before anyone else.' },
+    { title: 'Bharat ID by Pirento', text: 'Your private Pirento account ID, linked to your membership and shown on your card.' },
+  ],
+  steps: [
+    { title: 'Create your account', text: 'Sign up with email, mobile, Google or Bharat ID.' },
+    { title: 'Pay the membership fee', text: 'Securely through Razorpay. You get a fee receipt at once.' },
+    { title: 'Get your certificate', text: 'Member number, certificate and member card appear in your dashboard.' },
+    { title: 'Complete your Bharat ID', text: 'Finish it on Bharat ID by Pirento. Until then it shows as pending in your dashboard.' },
+  ],
+  note: 'This is a supporter membership of Pirento Foundation. It does not make you a member or shareholder of the company under the Companies Act, 2013, and gives no voting rights. The fee is not a donation and is not eligible for 80G.',
+  faqs: [
+    { q: 'Who can become a member?', a: 'Anyone aged 18 or over who supports our work. You need a Pirento Foundation account.' },
+    { q: 'Do I need Bharat ID to join?', a: 'You can pay and receive your certificate first. Linking your Bharat ID by Pirento completes your membership profile; it shows as pending until you finish it on Bharat ID.' },
+    { q: 'Is Bharat ID a government ID?', a: 'No. Bharat ID by Pirento is a private Pirento account ID for use within the Pirento ecosystem. It is not Aadhaar or any government identity, and is not proof of citizenship or residence.' },
+    { q: 'Is the fee tax-deductible?', a: 'No. Membership fees are not donations, so they are not eligible for 80G. Donations are.' },
+    { q: 'Do I need membership to donate?', a: 'No. Anyone can donate, with or without an account or membership.' },
+  ],
+};

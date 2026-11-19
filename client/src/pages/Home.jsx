@@ -7,6 +7,12 @@ import { Button, Hl, SectionHeader, StatusBadge, Tag, Lines, Label } from '../co
 import { brand, mission, programmes, roadmap, governance, donateSteps } from '../data/site.js';
 import { Timeline } from './About.jsx';
 import Ecosystem from '../components/Ecosystem.jsx';
+import { BharatIdCard } from '../components/BharatId.jsx';
+import { UpdateCards } from './Updates.jsx';
+import { useSettings } from '../lib/settings.jsx';
+import { api, inr } from '../lib/api.js';
+import { membership } from '../data/site.js';
+import { useEffect, useState } from 'react';
 
 function Hero() {
   const visual = useRef(null);
@@ -28,7 +34,7 @@ function Hero() {
               <span aria-hidden className="mt-3 block h-0.5 w-8 bg-on-inverse" />
             </p>
             <p data-hero-after className="max-w-[16rem] text-right text-xs leading-relaxed text-inverse-muted">
-              {brand.legalForm}
+              {brand.registrationsLine}
               <br />Basti, Uttar Pradesh
             </p>
           </div>
@@ -96,11 +102,56 @@ function Programmes() {
   );
 }
 
+function MembershipBand() {
+  const st = useSettings();
+  return (
+    <section className="border-t border-rule py-28 md:py-40">
+      <div className="container-x grid items-center gap-14 lg:grid-cols-12">
+        <div className="lg:col-span-6">
+          <Label n={3}>Membership</Label>
+          <Lines lines={['Become a member.', <>Get your <Hl>Bharat ID</Hl>.</>]} className="h-section mt-6" />
+          <p data-reveal className="prose-body mt-6">
+            For <strong>{inr(st.membershipFee ?? 1000)}</strong> you join Pirento Foundation as a supporter member: a numbered certificate, a member card, first invitations to the work, and your <strong>Bharat ID by Pirento</strong>, the private Pirento account ID you complete on Bharat ID.
+          </p>
+          <ul data-reveal className="mt-6 space-y-2 text-[0.95rem] text-muted">
+            {membership.steps.map((s, i) => <li key={s.title}><span className="tabular-nums text-ink">{String(i + 1).padStart(2, '0')}</span> {s.title}</li>)}
+          </ul>
+          <div data-reveal className="mt-8 flex flex-wrap gap-3">
+            <Button to="/membership" variant="accent" cursor="Join">Become a member</Button>
+            <Button to="/donate" variant="outline">Just donate</Button>
+          </div>
+        </div>
+        <div data-reveal className="lg:col-span-5 lg:col-start-8">
+          <BharatIdCard b={{ number: '0000000000', status: 'contact_confirmed', name: 'Your name here' }} />
+          <p className="mt-3 text-xs text-muted">Sample card. Bharat ID by Pirento is a private Pirento account ID, not a government ID.</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function LatestUpdates() {
+  const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    api('/posts').then((d) => setPosts(d.posts.slice(0, 3)), () => {});
+  }, []);
+  if (!posts.length) return null;
+  return (
+    <section className="border-t border-rule py-28 md:py-36">
+      <div className="container-x">
+        <SectionHeader n={7} label="Updates" lines={['From the field.']} intro="What we planted, delivered and learned." />
+        <div className="mt-14"><UpdateCards posts={posts} /></div>
+        <div className="mt-10"><Button to="/updates" variant="outline">All updates</Button></div>
+      </div>
+    </section>
+  );
+}
+
 function HowToGive() {
   return (
     <section className="inverse bg-inverse py-28 text-on-inverse md:py-40">
       <div className="container-x">
-        <SectionHeader n={3} label="How giving works" inverse lines={['Give in a minute.', 'Keep the proof forever.']} intro="Your receipt and certificate are generated the moment your payment is confirmed." />
+        <SectionHeader n={4} label="How giving works" inverse lines={['Give in a minute.', 'Keep the proof forever.']} intro="Your receipt and certificate are generated the moment your payment is confirmed." />
         <ol className="relative mt-20 grid gap-12 md:grid-cols-3 md:gap-8">
           <span aria-hidden className="absolute left-0 right-0 top-5 hidden h-px bg-inverse-rule md:block" />
           {donateSteps.map((s, i) => (
@@ -124,7 +175,7 @@ function Trust() {
   return (
     <section className="py-28 md:py-40">
       <div className="container-x">
-        <SectionHeader n={4} label="Governance" lines={['Our money stays separate.', <>Our books stay <Hl>open</Hl>.</>]} intro={mission} />
+        <SectionHeader n={5} label="Governance" lines={['Our money stays separate.', <>Our books stay <Hl>open</Hl>.</>]} intro={mission} />
         <div className="mt-16 grid gap-px overflow-hidden rounded-[22px] border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-3">
           {governance.map((g) => (
             <div key={g.title} data-reveal className="bg-paper p-7 md:p-9">
@@ -143,7 +194,7 @@ function Roadmap() {
     <section className="border-t border-rule py-28 md:py-40">
       <div className="container-x grid gap-12 md:grid-cols-12">
         <div className="md:col-span-4">
-          <Label n={5}>Roadmap</Label>
+          <Label n={6}>Roadmap</Label>
           <Lines lines={['Pilot first.', 'Scale on proof.']} className="h-section mt-6" />
           <div data-reveal className="mt-6 flex gap-2"><StatusBadge status="Now" /><StatusBadge status="Expected" /></div>
         </div>
@@ -176,9 +227,11 @@ export default function Home() {
       <Hero />
       <Programmes />
       <Ecosystem n={2} />
+      <MembershipBand />
       <HowToGive />
       <Trust />
       <Roadmap />
+      <LatestUpdates />
       <FinalCta />
     </Page>
   );

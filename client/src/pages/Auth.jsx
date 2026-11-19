@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
-import { Smartphone, Mail, Check, Eye, EyeOff, ArrowLeft, KeyRound } from 'lucide-react';
+import { Smartphone, Mail, Check, Eye, EyeOff, ArrowLeft, KeyRound, Fingerprint } from 'lucide-react';
 import Page from '../components/Page.jsx';
 import { Button, Field, Notice } from '../components/ui.jsx';
 import { useAuth } from '../lib/auth.jsx';
@@ -31,9 +31,25 @@ function GoogleButton({ clientId, onCredential, text = 'continue_with' }) {
     return () => void (cancelled = true);
   }, [clientId, text]);
   if (!clientId) return null;
+  return <div ref={box} className="flex min-h-11 w-full justify-center" />;
+}
+
+/** Bharat ID by Pirento and Google, above the code/password forms. */
+function Social({ cfg, next, onGoogle, signup }) {
+  if (!cfg.bharatId && !cfg.googleClientId) return null;
   return (
     <>
-      <div ref={box} className="flex min-h-11 w-full justify-center" />
+      <div className="space-y-3">
+        {cfg.bharatId && (
+          <a
+            href={`/api/auth/bharatid/start?mode=login${next ? `&next=${encodeURIComponent(next)}` : ''}`}
+            className="flex h-11 w-full items-center justify-center gap-2.5 rounded-full bg-inverse text-sm font-medium text-on-inverse transition-opacity hover:opacity-90"
+          >
+            <Fingerprint aria-hidden className="size-4 text-accent" /> {signup ? 'Sign up' : 'Continue'} with Bharat ID by Pirento
+          </a>
+        )}
+        <GoogleButton clientId={cfg.googleClientId} text={signup ? 'signup_with' : 'continue_with'} onCredential={onGoogle} />
+      </div>
       <div className="my-6 flex items-center gap-4 text-xs uppercase tracking-[0.2em] text-muted">
         <span className="h-px flex-1 bg-rule" /> or <span className="h-px flex-1 bg-rule" />
       </div>
@@ -94,7 +110,7 @@ const labelFor = (ch) => (ch === 'phone' ? 'Mobile number' : 'Email address');
 
 /* ---------- sign in ---------- */
 
-function SignIn({ cfg }) {
+function SignIn({ cfg, next }) {
   const { signIn, setUser } = useAuth();
   const navigate = useNavigate();
   const [view, setView] = useState('code'); // code | password | reset
@@ -154,7 +170,7 @@ function SignIn({ cfg }) {
   const purpose = view === 'reset' ? 'reset' : 'login';
   return (
     <div>
-      {view === 'code' && !sent && <GoogleButton clientId={cfg.googleClientId} onCredential={(credential) => run(() => signIn('/auth/google', { credential }))} />}
+      {view === 'code' && !sent && <Social cfg={cfg} next={next} onGoogle={(credential) => run(() => signIn('/auth/google', { credential }))} />}
       {view === 'reset' && (
         <div className="mb-6">
           <h2 className="text-2xl">Reset your password</h2>
@@ -299,7 +315,7 @@ function VerifyRow({ channel, value, onValue, required, record, setRecord }) {
   );
 }
 
-function Register({ cfg }) {
+function Register({ cfg, next }) {
   const { signIn } = useAuth();
   const [f, setF] = useState({ name: '', email: '', phone: '', password: '', agree: false });
   const [emailRec, setEmailRec] = useState({});
@@ -318,7 +334,7 @@ function Register({ cfg }) {
   }
   return (
     <div>
-      <GoogleButton clientId={cfg.googleClientId} text="signup_with" onCredential={(credential) => signIn('/auth/google', { credential }).catch((e) => setState({ busy: false, error: e.message }))} />
+      <Social cfg={cfg} next={next} signup onGoogle={(credential) => signIn('/auth/google', { credential }).catch((e) => setState({ busy: false, error: e.message }))} />
       <form onSubmit={submit} className="space-y-5">
         <Field label="Full name" name="name" required autoComplete="name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
         <VerifyRow channel="email" required value={f.email} onValue={(v) => setF({ ...f, email: v })} record={emailRec} setRecord={setEmailRec} />
@@ -363,7 +379,7 @@ export default function Auth({ mode }) {
               <span className="line"><span className="text-accent">Every receipt.</span></span>
             </h1>
             <p data-hero-after className="relative mt-8 max-w-sm text-inverse-muted">
-              Donation receipts, certificates and volunteer records, in one place. Sign in with Google, or with a code sent to your mobile or email.
+              Receipts, 80G documents, membership and certificates in one place. Sign in with Bharat ID by Pirento, Google, or a code sent to your mobile or email.
             </p>
           </div>
 
@@ -375,7 +391,8 @@ export default function Auth({ mode }) {
                 </Link>
               ))}
             </div>
-            {!cfg ? <div className="h-72" aria-busy="true" /> : isLogin ? <SignIn cfg={cfg} /> : <Register cfg={cfg} />}
+            {params.get('error') && <div className="mb-6"><Notice kind="error">{params.get('error')}</Notice></div>}
+            {!cfg ? <div className="h-72" aria-busy="true" /> : isLogin ? <SignIn cfg={cfg} next={next} /> : <Register cfg={cfg} next={next} />}
           </div>
         </div>
       </section>
