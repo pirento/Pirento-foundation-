@@ -1,9 +1,12 @@
+// Public "Updates" (/api/posts): published news from the field. Admins write them in the admin desk.
 import { Router } from 'express';
 import { Post } from './models.js';
 
 const router = Router();
 router.get('/', async (_req, res) => {
-  res.json({ posts: await Post.find({ published: true }, '-body').sort({ publishedAt: -1 }).limit(50).lean() });
+  res.json({
+    posts: await Post.find({ published: true }, '-body').sort({ publishedAt: -1 }).limit(50).lean(),
+  });
 });
 router.get('/:slug', async (req, res) => {
   const post = await Post.findOne({ slug: String(req.params.slug), published: true }).lean();

@@ -49,7 +49,11 @@ export const programmes = [
       'Plastic-free drives and environmental awareness in schools.',
     ],
     tags: ['Native trees', 'Survival checks', 'Water & soil'],
-    measure: { counted: 'Trees planted, sites, volunteers', outcome: 'Survival at 6 / 12 / 24 months', quality: 'Geotagged photos, species suitability, spot checks' },
+    measure: {
+      counted: 'Trees planted, sites, volunteers',
+      outcome: 'Survival at 6 / 12 / 24 months',
+      quality: 'Geotagged photos, species suitability, spot checks',
+    },
   },
   {
     key: 'food',
@@ -64,7 +68,11 @@ export const programmes = [
       'Beneficiary register, food-safety checks, stock records and a duplicate check for every distribution.',
     ],
     tags: ['Ration kits', 'Emergency relief', 'Beneficiary register'],
-    measure: { counted: 'Meals and ration kits, households served', outcome: 'Response time in emergencies', quality: 'Food safety, stock reconciliation, duplicate control' },
+    measure: {
+      counted: 'Meals and ration kits, households served',
+      outcome: 'Response time in emergencies',
+      quality: 'Food safety, stock reconciliation, duplicate control',
+    },
   },
   {
     key: 'education',
@@ -78,7 +86,11 @@ export const programmes = [
       'Skill and vocational courses for youth, drawing on Venturecore’s experience in digital services.',
     ],
     tags: ['Scholarships', 'School kits', 'Skills'],
-    measure: { counted: 'Students supported, kits given', outcome: 'Attendance, retention, progression', quality: 'Need-based selection, child safeguarding' },
+    measure: {
+      counted: 'Students supported, kits given',
+      outcome: 'Attendance, retention, progression',
+      quality: 'Need-based selection, child safeguarding',
+    },
   },
   {
     key: 'health',
@@ -92,7 +104,11 @@ export const programmes = [
       'Partnerships with government schemes, local bodies, NGOs and CSR donors.',
     ],
     tags: ['Health camps', 'Women & youth', 'Partnerships'],
-    measure: { counted: 'Camps held, people trained', outcome: 'People earning after training', quality: 'Qualified doctors, trainer records' },
+    measure: {
+      counted: 'Camps held, people trained',
+      outcome: 'People earning after training',
+      quality: 'Qualified doctors, trainer records',
+    },
   },
 ];
 
@@ -106,44 +122,117 @@ export const donateOptions = [
 export const presetAmounts = [500, 1000, 2500, 5000];
 
 export const roadmap = [
-  { stage: '0–12 months', status: 'Now', title: 'One pilot per programme', text: 'Pilot plantation with a survival baseline; scheduled distributions and an emergency protocol; scholarships and school kits.' },
-  { stage: '1–3 years', status: 'Expected', title: 'Nurseries and partnerships', text: 'Nurseries with panchayat and school partners; a community kitchen or food-bank model; learning and skill centres.' },
-  { stage: '3–7 years', status: 'Expected', title: 'District scale', text: 'District-scale restoration and a multi-district relief network. School of Pirento Lucknow, only after approvals.' },
-  { stage: 'Long term', status: 'Expected', title: 'Lasting systems', text: 'Climate-resilience research and sustainable nutrition systems. University of Pirento Lucknow, only after lawful establishment.' },
+  {
+    stage: '0–12 months',
+    status: 'Now',
+    title: 'One pilot per programme',
+    text: 'Pilot plantation with a survival baseline; scheduled distributions and an emergency protocol; scholarships and school kits.',
+  },
+  {
+    stage: '1–3 years',
+    status: 'Expected',
+    title: 'Nurseries and partnerships',
+    text: 'Nurseries with panchayat and school partners; a community kitchen or food-bank model; learning and skill centres.',
+  },
+  {
+    stage: '3–7 years',
+    status: 'Expected',
+    title: 'District scale',
+    text: 'District-scale restoration and a multi-district relief network. School of Pirento Lucknow, only after approvals.',
+  },
+  {
+    stage: 'Long term',
+    status: 'Expected',
+    title: 'Lasting systems',
+    text: 'Climate-resilience research and sustainable nutrition systems. University of Pirento Lucknow, only after lawful establishment.',
+  },
 ];
 export const futureNote =
   'School of Pirento and University of Pirento are future concepts only. They do not admit students, take fees or award certificates until land, recognition and UGC or board approvals are in place.';
 
 export const board = [
-  { name: 'Ravikant Soni', role: 'Founder & Director, Venturecore', office: 'Chairperson / Managing Director (to be confirmed)' },
-  { name: 'Jang Bahadur Chaudhary', role: 'Director, Venturecore', office: 'Secretary or Treasurer (to be confirmed)' },
+  {
+    name: 'Ravikant Soni',
+    role: 'Founder & Director, Venturecore',
+    office: 'Chairperson / Managing Director (to be confirmed)',
+  },
+  {
+    name: 'Jang Bahadur Chaudhary',
+    role: 'Director, Venturecore',
+    office: 'Secretary or Treasurer (to be confirmed)',
+  },
   { name: 'Ashish Soni', role: 'Director, Venturecore', office: 'Secretary or Treasurer (to be confirmed)' },
 ];
 
 export const governance = [
-  { title: 'Own money, own books', text: 'A separate bank account and PAN in the Foundation’s name. No mixing with Venturecore’s commercial funds.' },
+  {
+    title: 'Own money, own books',
+    text: 'A separate bank account and PAN in the Foundation’s name. No mixing with Venturecore’s commercial funds.',
+  },
   { title: 'Regular board meetings', text: 'At least quarterly, with a quorum and minutes kept.' },
-  { title: 'Conflict of interest', text: 'Any deal with Venturecore, Pirento brands, board members or their relatives needs written terms and approval by members with no interest in it.' },
-  { title: 'Restricted gifts honoured', text: 'A donation for a stated purpose is spent only on that purpose.' },
-  { title: 'Audited every year', text: 'Financial year April–March, an annual audit, and an annual activity and fund-utilisation report.' },
-  { title: 'Policies first', text: 'Finance and procurement, conflict of interest, child protection, food safety, grievance and whistle-blowing.' },
+  {
+    title: 'Conflict of interest',
+    text: 'Any deal with Venturecore, Pirento brands, board members or their relatives needs written terms and approval by members with no interest in it.',
+  },
+  {
+    title: 'Restricted gifts honoured',
+    text: 'A donation for a stated purpose is spent only on that purpose.',
+  },
+  {
+    title: 'Audited every year',
+    text: 'Financial year April–March, an annual audit, and an annual activity and fund-utilisation report.',
+  },
+  {
+    title: 'Policies first',
+    text: 'Finance and procurement, conflict of interest, child protection, food safety, grievance and whistle-blowing.',
+  },
 ];
 
 export const donateSteps = [
   { title: 'Choose a cause', text: 'Pick a programme, or let us use it where it is needed most.' },
-  { title: 'Pay securely', text: 'UPI, cards or net banking through Razorpay, once or every month. No login needed.' },
-  { title: 'Get your 80G receipt', text: 'A numbered 80G receipt, a certificate you can verify, and an account to keep them all.' },
+  {
+    title: 'Pay securely',
+    text: 'UPI, cards or net banking through Razorpay, once or every month. No login needed.',
+  },
+  {
+    title: 'Get your 80G receipt',
+    text: 'A numbered 80G receipt, a certificate you can verify, and an account to keep them all.',
+  },
 ];
 
 export const faqs = [
-  { q: 'Is my donation tax-deductible?', a: 'Yes. Pirento Foundation is registered under sections 12A and 80G of the Income-tax Act. Add your PAN and address on the form and your receipt carries the 80G particulars. We file Form 10BD and you receive Form 10BE, which is what you use to claim the deduction. Cash gifts above ₹2,000 are not deductible.' },
-  { q: 'Do I need an account to donate?', a: 'No. Just fill the form and pay. We create an account for you automatically and email a link to set your password, so all your receipts stay in one place.' },
-  { q: 'How does monthly giving work?', a: 'Choose “Monthly”, pick an amount from ₹100 and approve the mandate in Razorpay. You get a receipt every month and can stop any time from your dashboard; it ends before the next charge.' },
-  { q: 'Can I choose where my money goes?', a: 'Yes. Pick a programme on the form. Restricted donations are spent only on their stated purpose.' },
-  { q: 'Can companies give CSR funds?', a: 'Yes. We are registered for CSR (Form CSR-1). Write to us for our registration details and a CSR proposal.' },
-  { q: 'Can I give from outside India?', a: 'We hold FCRA registration, but foreign contributions must go only to our designated FCRA bank account and cannot be taken through this form. Please write to us for the details.' },
-  { q: 'How do I check a certificate is real?', a: 'Every certificate has a number. Enter it on the Verify page to see who it was issued to and whether it is still valid.' },
-  { q: 'Can I get a refund?', a: 'Donations are normally final, but we refund duplicate charges, wrong amounts and unauthorised payments. See our Refund & Cancellation Policy.' },
+  {
+    q: 'Is my donation tax-deductible?',
+    a: 'Yes. Pirento Foundation is registered under sections 12A and 80G of the Income-tax Act. Add your PAN and address on the form and your receipt carries the 80G particulars. We file Form 10BD and you receive Form 10BE, which is what you use to claim the deduction. Cash gifts above ₹2,000 are not deductible.',
+  },
+  {
+    q: 'Do I need an account to donate?',
+    a: 'No. Just fill the form and pay. We create an account for you automatically and email a link to set your password, so all your receipts stay in one place.',
+  },
+  {
+    q: 'How does monthly giving work?',
+    a: 'Choose “Monthly”, pick an amount from ₹100 and approve the mandate in Razorpay. You get a receipt every month and can stop any time from your dashboard; it ends before the next charge.',
+  },
+  {
+    q: 'Can I choose where my money goes?',
+    a: 'Yes. Pick a programme on the form. Restricted donations are spent only on their stated purpose.',
+  },
+  {
+    q: 'Can companies give CSR funds?',
+    a: 'Yes. We are registered for CSR (Form CSR-1). Write to us for our registration details and a CSR proposal.',
+  },
+  {
+    q: 'Can I give from outside India?',
+    a: 'We hold FCRA registration, but foreign contributions must go only to our designated FCRA bank account and cannot be taken through this form. Please write to us for the details.',
+  },
+  {
+    q: 'How do I check a certificate is real?',
+    a: 'Every certificate has a number. Enter it on the Verify page to see who it was issued to and whether it is still valid.',
+  },
+  {
+    q: 'Can I get a refund?',
+    a: 'Donations are normally final, but we refund duplicate charges, wrong amounts and unauthorised payments. See our Refund & Cancellation Policy.',
+  },
 ];
 
 export const ecosystem = {
@@ -189,27 +278,68 @@ export const legalLinks = [
   { to: '/privacy', label: 'Privacy Policy' },
   { to: '/refund-policy', label: 'Refund & Cancellation' },
 ];
-export const contactTopics = ['Partnership', 'CSR support', 'Volunteering', 'Donation or receipt', 'Privacy or data request', 'Grievance', 'Other'];
+export const contactTopics = [
+  'Partnership',
+  'CSR support',
+  'Volunteering',
+  'Donation or receipt',
+  'Privacy or data request',
+  'Grievance',
+  'Other',
+];
 
 export const membership = {
   benefits: [
-    { title: 'Your membership certificate', text: 'A numbered certificate and member card, verifiable online by anyone.' },
-    { title: 'A place in the work', text: 'First invitations to plantation drives, relief camps and volunteer days in Basti and beyond.' },
-    { title: 'Updates from the field', text: 'Programme reports, survival counts and fund-use summaries, before anyone else.' },
-    { title: 'Bharat ID by Pirento', text: 'Your private Pirento account ID, linked to your membership and shown on your card.' },
+    {
+      title: 'Your membership certificate',
+      text: 'A numbered certificate and member card, verifiable online by anyone.',
+    },
+    {
+      title: 'A place in the work',
+      text: 'First invitations to plantation drives, relief camps and volunteer days in Basti and beyond.',
+    },
+    {
+      title: 'Updates from the field',
+      text: 'Programme reports, survival counts and fund-use summaries, before anyone else.',
+    },
+    {
+      title: 'Bharat ID by Pirento',
+      text: 'Your private Pirento account ID, linked to your membership and shown on your card.',
+    },
   ],
   steps: [
     { title: 'Create your account', text: 'Sign up with email, mobile, Google or Bharat ID.' },
     { title: 'Pay the membership fee', text: 'Securely through Razorpay. You get a fee receipt at once.' },
-    { title: 'Get your certificate', text: 'Member number, certificate and member card appear in your dashboard.' },
-    { title: 'Complete your Bharat ID', text: 'Finish it on Bharat ID by Pirento. Until then it shows as pending in your dashboard.' },
+    {
+      title: 'Get your certificate',
+      text: 'Member number, certificate and member card appear in your dashboard.',
+    },
+    {
+      title: 'Complete your Bharat ID',
+      text: 'Finish it on Bharat ID by Pirento. Until then it shows as pending in your dashboard.',
+    },
   ],
   note: 'This is a supporter membership of Pirento Foundation. It does not make you a member or shareholder of the company under the Companies Act, 2013, and gives no voting rights. The fee is not a donation and is not eligible for 80G.',
   faqs: [
-    { q: 'Who can become a member?', a: 'Anyone aged 18 or over who supports our work. You need a Pirento Foundation account.' },
-    { q: 'Do I need Bharat ID to join?', a: 'You can pay and receive your certificate first. Linking your Bharat ID by Pirento completes your membership profile; it shows as pending until you finish it on Bharat ID.' },
-    { q: 'Is Bharat ID a government ID?', a: 'No. Bharat ID by Pirento is a private Pirento account ID for use within the Pirento ecosystem. It is not Aadhaar or any government identity, and is not proof of citizenship or residence.' },
-    { q: 'Is the fee tax-deductible?', a: 'No. Membership fees are not donations, so they are not eligible for 80G. Donations are.' },
-    { q: 'Do I need membership to donate?', a: 'No. Anyone can donate, with or without an account or membership.' },
+    {
+      q: 'Who can become a member?',
+      a: 'Anyone aged 18 or over who supports our work. You need a Pirento Foundation account.',
+    },
+    {
+      q: 'Do I need Bharat ID to join?',
+      a: 'You can pay and receive your certificate first. Linking your Bharat ID by Pirento completes your membership profile; it shows as pending until you finish it on Bharat ID.',
+    },
+    {
+      q: 'Is Bharat ID a government ID?',
+      a: 'No. Bharat ID by Pirento is a private Pirento account ID for use within the Pirento ecosystem. It is not Aadhaar or any government identity, and is not proof of citizenship or residence.',
+    },
+    {
+      q: 'Is the fee tax-deductible?',
+      a: 'No. Membership fees are not donations, so they are not eligible for 80G. Donations are.',
+    },
+    {
+      q: 'Do I need membership to donate?',
+      a: 'No. Anyone can donate, with or without an account or membership.',
+    },
   ],
 };

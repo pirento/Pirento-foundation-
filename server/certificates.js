@@ -1,3 +1,4 @@
+// Certificates (/api/certificates/*): issuing, the public verify lookup, and the PDF download.
 import { Router } from 'express';
 import crypto from 'node:crypto';
 import { Certificate, Donation, User, Membership } from './models.js';
@@ -9,9 +10,9 @@ import { getSettings } from './settings.js';
 // 16 hex chars = 64 bits: the number doubles as an unguessable link to the PDF.
 export const newCertNo = () => `PFC-${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
 
-
 export async function issueCertificate(fields) {
-  if (!fields.user && fields.email) fields.user = (await User.findOne({ email: fields.email.toLowerCase() }))?._id;
+  if (!fields.user && fields.email)
+    fields.user = (await User.findOne({ email: fields.email.toLowerCase() }))?._id;
   return Certificate.create({ certNo: newCertNo(), ...fields });
 }
 
@@ -32,14 +33,27 @@ const router = Router();
 const validNo = (no) => /^PFC-[0-9A-F]{16}$/.test(no);
 
 router.get('/mine', requireUser, async (req, res) => {
-  res.json({ certificates: await Certificate.find({ $or: mineFilter(req.user) }).sort({ createdAt: -1 }).lean() });
+  res.json({
+    certificates: await Certificate.find({ $or: mineFilter(req.user) })
+      .sort({ createdAt: -1 })
+      .lean(),
+  });
 });
 
 router.get('/verify/:certNo', async (req, res) => {
-  const c = validNo(req.params.certNo) ? await Certificate.findOne({ certNo: req.params.certNo }).lean() : null;
+  const c = validNo(req.params.certNo)
+    ? await Certificate.findOne({ certNo: req.params.certNo }).lean()
+    : null;
   if (!c) return res.status(404).json({ error: 'No certificate found with this number.' });
   res.json({
-    certificate: { certNo: c.certNo, kind: c.kind, title: c.title, recipientName: c.recipientName, issuedAt: c.createdAt, revoked: c.revoked },
+    certificate: {
+      certNo: c.certNo,
+      kind: c.kind,
+      title: c.title,
+      recipientName: c.recipientName,
+      issuedAt: c.createdAt,
+      revoked: c.revoked,
+    },
   });
 });
 
@@ -52,7 +66,11 @@ router.get('/:certNo/pdf', async (req, res) => {
   const user = membership ? await User.findById(membership.user) : null;
   const settings = await getSettings();
   res.type('application/pdf').set('Content-Disposition', `inline; filename="${c.certNo}.pdf"`);
-  renderCertificate(c, { donation, membership, user, settings, verifyUrl: `${siteUrl()}/verify/${c.certNo}` }, res);
+  renderCertificate(
+    c,
+    { donation, membership, user, settings, verifyUrl: `${siteUrl()}/verify/${c.certNo}` },
+    res,
+  );
 });
 
 export default router;

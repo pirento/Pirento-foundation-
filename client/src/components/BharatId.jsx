@@ -1,3 +1,4 @@
+// Bharat ID by Pirento: status wording and the digital account card shown in the dashboard.
 import { Fingerprint } from 'lucide-react';
 
 // Status words follow the Bharat ID by Pirento trust model: precise, never "verified" in general.
@@ -11,7 +12,8 @@ export const BHARAT_STATUS = {
   closed: { label: 'Closed', complete: false },
 };
 
-export const bharatState = (b) => (!b ? 'not_linked' : BHARAT_STATUS[b.status]?.complete ? 'complete' : 'pending');
+export const bharatState = (b) =>
+  !b ? 'not_linked' : BHARAT_STATUS[b.status]?.complete ? 'complete' : 'pending';
 const group = (n) => (n ? n.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3') : '—');
 
 /** Digital account card. Deliberately plain: no emblems, flags or official-looking devices. */
@@ -25,10 +27,14 @@ export function BharatIdCard({ b, name }) {
         </div>
         <Fingerprint aria-hidden className="size-6 text-accent" />
       </div>
-      <p className="poster mt-8 text-[clamp(2rem,4.5vw,3rem)] tabular-nums tracking-wide">{group(b?.number)}</p>
+      <p className="poster mt-8 text-[clamp(2rem,4.5vw,3rem)] tabular-nums tracking-wide">
+        {group(b?.number)}
+      </p>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-3 text-sm">
         <span>{b?.name || name}</span>
-        <span className="rounded-full border border-inverse-rule px-3 py-1 text-xs">{b ? BHARAT_STATUS[b.status]?.label ?? b.status : 'Not linked yet'}</span>
+        <span className="rounded-full border border-inverse-rule px-3 py-1 text-xs">
+          {b ? (BHARAT_STATUS[b.status]?.label ?? b.status) : 'Not linked yet'}
+        </span>
       </div>
     </div>
   );

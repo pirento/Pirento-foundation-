@@ -1,3 +1,5 @@
+// Builds the Express app: middleware, API routes, the built React site, and the error handler.
+// Kept separate from index.js so tests can start it without a real database or port.
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import path from 'node:path';
@@ -42,7 +44,13 @@ export function createApp() {
 
   app.use((err, _req, res, _next) => {
     if (!err.expose) console.error(err);
-    res.status(err.status || 500).json({ error: err.expose ? err.message : err.status === 400 ? 'Bad request.' : 'Something went wrong. Please try again.' });
+    res.status(err.status || 500).json({
+      error: err.expose
+        ? err.message
+        : err.status === 400
+          ? 'Bad request.'
+          : 'Something went wrong. Please try again.',
+    });
   });
   return app;
 }

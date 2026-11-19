@@ -1,3 +1,4 @@
+// Accounts created on the donor's behalf (donations without login) and their set-password links.
 import crypto from 'node:crypto';
 import { User } from './models.js';
 import { normPhone } from './otp.js';
@@ -32,7 +33,10 @@ export async function sendAccountSetup(user) {
   user.setupTokenHash = sha(token);
   user.setupTokenExpires = new Date(Date.now() + SETUP_DAYS * 86400_000);
   await user.save();
-  notify({ to: user.email, ...templates.accountSetup(user, `${siteUrl()}/set-password?token=${token}`, SETUP_DAYS) });
+  notify({
+    to: user.email,
+    ...templates.accountSetup(user, `${siteUrl()}/set-password?token=${token}`, SETUP_DAYS),
+  });
   return token;
 }
 

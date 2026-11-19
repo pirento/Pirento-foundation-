@@ -28,7 +28,9 @@ export const policies = [
             'You must be 18 or older to hold an account, donate or become a member. Younger supporters may give through a parent or guardian.',
             'You can sign in with a password, a one-time code to your email or mobile, Google, or Bharat ID by Pirento.',
             'If you donate without signing in, we create an account for you with the email you give and send a one-time link to set your password. We never send passwords by email.',
-            'Keep your password and codes private. Tell us at once at ' + EMAIL + ' if you think someone else has used your account.',
+            'Keep your password and codes private. Tell us at once at ' +
+              EMAIL +
+              ' if you think someone else has used your account.',
             'You can ask us to close your account at any time. We keep donation records for as long as the law requires (see the Privacy Policy).',
           ],
         ],
@@ -65,7 +67,9 @@ export const policies = [
       {
         h: 'Foreign contributions',
         body: [
-          'Under the Foreign Contribution (Regulation) Act, 2010, foreign contributions may be received only in our designated FCRA bank account. This website accepts payments only from Indian donors in Indian rupees. If you are a foreign national or an overseas organisation, or are giving from foreign sources, please write to ' + EMAIL + ' before giving.',
+          'Under the Foreign Contribution (Regulation) Act, 2010, foreign contributions may be received only in our designated FCRA bank account. This website accepts payments only from Indian donors in Indian rupees. If you are a foreign national or an overseas organisation, or are giving from foreign sources, please write to ' +
+            EMAIL +
+            ' before giving.',
         ],
       },
       {
@@ -96,7 +100,9 @@ export const policies = [
       {
         h: 'Future plans',
         body: [
-          'School of Pirento and University of Pirento are future plans only. They do not admit students, take fees or award certificates until land, recognition and UGC or board approvals are in place. Do not pay anyone who claims otherwise; report it to ' + EMAIL + '.',
+          'School of Pirento and University of Pirento are future plans only. They do not admit students, take fees or award certificates until land, recognition and UGC or board approvals are in place. Do not pay anyone who claims otherwise; report it to ' +
+            EMAIL +
+            '.',
         ],
       },
       {
@@ -128,7 +134,8 @@ export const policies = [
     slug: 'privacy',
     title: 'Privacy Policy',
     lines: ['Privacy', 'Policy.'],
-    intro: 'How Pirento Foundation collects, uses and protects your personal data, in line with the Digital Personal Data Protection Act, 2023 and the Information Technology Act, 2000.',
+    intro:
+      'How Pirento Foundation collects, uses and protects your personal data, in line with the Digital Personal Data Protection Act, 2023 and the Information Technology Act, 2000.',
     updated: UPDATED,
     sections: [
       {
@@ -197,7 +204,9 @@ export const policies = [
       },
       {
         h: 'Children',
-        body: ['Our accounts and memberships are for people aged 18 and over. We do not knowingly collect children’s data online. Beneficiary records for our education programmes are kept offline with parental consent under our child-protection practices.'],
+        body: [
+          'Our accounts and memberships are for people aged 18 and over. We do not knowingly collect children’s data online. Beneficiary records for our education programmes are kept offline with parental consent under our child-protection practices.',
+        ],
       },
       {
         h: 'Grievance Officer',
@@ -211,7 +220,8 @@ export const policies = [
     slug: 'refund-policy',
     title: 'Refund & Cancellation Policy',
     lines: ['Refunds and', 'cancellations.'],
-    intro: 'Donations are gifts and are normally final. Here is when we refund, how to stop a monthly gift, and how membership fees work.',
+    intro:
+      'Donations are gifts and are normally final. Here is when we refund, how to stop a monthly gift, and how membership fees work.',
     updated: UPDATED,
     sections: [
       {

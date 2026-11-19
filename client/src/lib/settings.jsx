@@ -1,3 +1,4 @@
+// Organisation settings (registration numbers, fees, links) fetched once and shared through context.
 import { createContext, useContext, useEffect, useState } from 'react';
 import { api } from './api.js';
 
@@ -7,7 +8,10 @@ const SettingsContext = createContext({});
 export function SettingsProvider({ children }) {
   const [settings, setSettings] = useState({});
   useEffect(() => {
-    api('/settings').then((d) => setSettings(d.settings), () => {});
+    api('/settings').then(
+      (d) => setSettings(d.settings),
+      () => {},
+    );
   }, []);
   return <SettingsContext value={{ ...settings, setSettings }}>{children}</SettingsContext>;
 }

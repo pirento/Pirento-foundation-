@@ -1,3 +1,4 @@
+// News from the field: the list at /updates and a single update at /updates/:slug.
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { ArrowUpRight } from 'lucide-react';
@@ -12,7 +13,13 @@ export function UpdateCards({ posts }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {posts.map((p) => (
-        <Link key={p._id} to={`/updates/${p.slug}`} data-reveal data-cursor="Read" className="group flex flex-col justify-between gap-8 rounded-[22px] border border-rule p-7 transition-[border-color,translate] duration-500 ease-ui hover:-translate-y-1 hover:border-ink">
+        <Link
+          key={p._id}
+          to={`/updates/${p.slug}`}
+          data-reveal
+          data-cursor="Read"
+          className="group flex flex-col justify-between gap-8 rounded-[22px] border border-rule p-7 transition-[border-color,translate] duration-500 ease-ui hover:-translate-y-1 hover:border-ink"
+        >
           <div>
             <p className="text-sm text-muted">{fmtDate(p.publishedAt)}</p>
             <h3 className="mt-3 text-2xl">{p.title}</h3>
@@ -20,7 +27,10 @@ export function UpdateCards({ posts }) {
           </div>
           <div className="flex items-center justify-between">
             {p.programme ? <Tag>{label(p.programme)}</Tag> : <span />}
-            <ArrowUpRight aria-hidden className="size-5 transition-transform duration-500 group-hover:rotate-45" />
+            <ArrowUpRight
+              aria-hidden
+              className="size-5 transition-transform duration-500 group-hover:rotate-45"
+            />
           </div>
         </Link>
       ))}
@@ -39,14 +49,28 @@ export default function Updates() {
     const p = data?.post;
     return (
       <Page title={p?.title ?? 'Update'} description={p?.summary}>
-        <PageHero label={p ? `Update · ${fmtDate(p.publishedAt)}` : 'Update'} lines={[p?.title ?? (data?.error ? 'Not found.' : '…')]} intro={p?.summary} />
+        <PageHero
+          label={p ? `Update · ${fmtDate(p.publishedAt)}` : 'Update'}
+          lines={[p?.title ?? (data?.error ? 'Not found.' : '…')]}
+          intro={p?.summary}
+        />
         {p && (
           <section className="border-t border-rule py-20">
             <article className="container-x max-w-[44rem]">
-              {p.body.split(/\n{2,}/).map((para, i) => <p key={i} className="mt-5 whitespace-pre-line leading-[1.75] text-muted first:mt-0">{para}</p>)}
+              {p.body.split(/\n{2,}/).map((para, i) => (
+                <p key={i} className="mt-5 whitespace-pre-line leading-[1.75] text-muted first:mt-0">
+                  {para}
+                </p>
+              ))}
               <div className="mt-10 flex flex-wrap gap-3">
-                {p.link && <Button href={p.link} target="_blank" rel="noopener noreferrer" variant="outline">More <span className="sr-only">(opens in a new tab)</span></Button>}
-                <Button to={`/donate${p.programme ? `?programme=${p.programme}` : ''}`} variant="accent">Support this work</Button>
+                {p.link && (
+                  <Button href={p.link} target="_blank" rel="noopener noreferrer" variant="outline">
+                    More <span className="sr-only">(opens in a new tab)</span>
+                  </Button>
+                )}
+                <Button to={`/donate${p.programme ? `?programme=${p.programme}` : ''}`} variant="accent">
+                  Support this work
+                </Button>
               </div>
             </article>
           </section>
@@ -55,11 +79,20 @@ export default function Updates() {
     );
   }
   return (
-    <Page title="Updates" description="News from Pirento Foundation's programmes in Basti and eastern Uttar Pradesh.">
-      <PageHero label="Updates" lines={['From the field.']} intro="What we planted, delivered and learned, posted by our team." />
+    <Page
+      title="Updates"
+      description="News from Pirento Foundation's programmes in Basti and eastern Uttar Pradesh."
+    >
+      <PageHero
+        label="Updates"
+        lines={['From the field.']}
+        intro="What we planted, delivered and learned, posted by our team."
+      />
       <section className="border-t border-rule py-20 md:py-28">
         <div className="container-x">
-          {data?.posts?.length === 0 && <p className="text-muted">No updates yet. The first one is coming soon.</p>}
+          {data?.posts?.length === 0 && (
+            <p className="text-muted">No updates yet. The first one is coming soon.</p>
+          )}
           {data?.posts?.length > 0 && <UpdateCards posts={data.posts} />}
         </div>
       </section>

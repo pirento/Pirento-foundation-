@@ -1,8 +1,13 @@
+// Renders one policy (terms, privacy, refunds) from data/policies.js with an "on this page" index.
 import { Link } from 'react-router';
 import Page, { PageHero } from '../components/Page.jsx';
 import { policies } from '../data/policies.js';
 
-const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const slugify = (s) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 
 export default function Policy({ slug }) {
   const doc = policies.find((p) => p.slug === slug);
@@ -25,26 +30,48 @@ export default function Policy({ slug }) {
               </ol>
               <p className="eyebrow mt-10">Other policies</p>
               <ul className="mt-4 space-y-2 text-sm">
-                {policies.filter((p) => p.slug !== slug).map((p) => (
-                  <li key={p.slug}><Link to={`/${p.slug}`} className="text-muted underline-offset-4 hover:text-ink hover:underline">{p.title}</Link></li>
-                ))}
+                {policies
+                  .filter((p) => p.slug !== slug)
+                  .map((p) => (
+                    <li key={p.slug}>
+                      <Link
+                        to={`/${p.slug}`}
+                        className="text-muted underline-offset-4 hover:text-ink hover:underline"
+                      >
+                        {p.title}
+                      </Link>
+                    </li>
+                  ))}
               </ul>
             </div>
           </nav>
           <article className="max-w-[44rem] lg:col-span-8 lg:col-start-5">
             {doc.sections.map((s, i) => (
-              <section key={s.h} id={slugify(s.h)} className="scroll-mt-28 border-t border-rule py-10 first:border-0 first:pt-0">
+              <section
+                key={s.h}
+                id={slugify(s.h)}
+                className="scroll-mt-28 border-t border-rule py-10 first:border-0 first:pt-0"
+              >
                 <h2 className="text-[clamp(1.5rem,2.4vw,2rem)]">
-                  <span className="mr-3 text-base tabular-nums text-muted">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="mr-3 text-base tabular-nums text-muted">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
                   {s.h}
                 </h2>
                 {s.body.map((b, j) =>
                   Array.isArray(b) ? (
-                    <ul key={j} className="mt-5 space-y-3 border-l border-rule pl-5 leading-relaxed text-muted">
-                      {b.map((li) => <li key={li}>{li}</li>)}
+                    <ul
+                      key={j}
+                      className="mt-5 space-y-3 border-l border-rule pl-5 leading-relaxed text-muted"
+                    >
+                      {b.map((li) => (
+                        <li key={li}>{li}</li>
+                      ))}
                     </ul>
                   ) : (
-                    <p key={j} className="mt-5 leading-[1.75] text-muted">{b}</p>
+                    <p key={j} className="mt-5 leading-[1.75] text-muted">
+                      {b}
+                    </p>
                   ),
                 )}
               </section>

@@ -1,3 +1,4 @@
+// Tiny fetch wrapper for our API plus number/date formatting helpers.
 export async function api(path, { method = 'GET', body } = {}) {
   const res = await fetch(`/api${path}`, {
     method,
@@ -11,5 +12,6 @@ export async function api(path, { method = 'GET', body } = {}) {
 }
 
 export const inr = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
-export const fmtDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+export const fmtDate = (d) =>
+  new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 export const pdfUrl = (certNo) => `/api/certificates/${certNo}/pdf`;

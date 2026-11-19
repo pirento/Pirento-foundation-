@@ -1,3 +1,5 @@
+// Organisation settings (/api/settings) that the admin edits: registration numbers, signatory,
+// bank details, membership fee and ecosystem links.
 import { Router } from 'express';
 import { Setting } from './models.js';
 import { requireAdmin } from './auth.js';
@@ -60,7 +62,8 @@ export async function saveSettings(input) {
       if (k.endsWith('Url') && v && !/^https:\/\/[^\s]+$/.test(v)) return `${k} must start with https://`;
       data[k] = v;
     }
-    if (typeof def === 'number' && k === 'membershipFee' && data[k] < 1) return 'Membership fee must be at least ₹1.';
+    if (typeof def === 'number' && k === 'membershipFee' && data[k] < 1)
+      return 'Membership fee must be at least ₹1.';
   }
   const current = await getSettings();
   const merged = { ...current, ...data };

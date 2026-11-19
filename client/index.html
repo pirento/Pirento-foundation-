@@ -6,19 +6,28 @@
     <script>
       (function () {
         var m;
-        try { m = localStorage.getItem('pf-mode'); } catch (e) {}
-        if (m !== 'light' && m !== 'dark') m = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        try {
+          m = localStorage.getItem('pf-mode');
+        } catch (e) {}
+        if (m !== 'light' && m !== 'dark')
+          m = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.dataset.mode = m;
       })();
     </script>
     <title>Pirento Foundation · People. Planet. Possibility.</title>
-    <meta name="description" content="Pirento Foundation works on green cover, food and emergency relief, and education in Basti and eastern Uttar Pradesh." />
+    <meta
+      name="description"
+      content="Pirento Foundation works on green cover, food and emergency relief, and education in Basti and eastern Uttar Pradesh."
+    />
     <meta name="theme-color" content="#fff0d5" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#04192c" media="(prefers-color-scheme: dark)" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Pirento Foundation" />
     <meta property="og:title" content="Pirento Foundation · People. Planet. Possibility." />
-    <meta property="og:description" content="Trees that survive, food when it is needed, and access to learning. Basti and eastern Uttar Pradesh first." />
+    <meta
+      property="og:description"
+      content="Trees that survive, food when it is needed, and access to learning. Basti and eastern Uttar Pradesh first."
+    />
     <!-- PLACEHOLDER: add a 1200×630 og.png to client/public -->
     <meta property="og:image" content="https://pirentofoundation.org/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -35,7 +44,13 @@
         "url": "https://pirentofoundation.org",
         "telephone": "+91 9988556861",
         "parentOrganization": { "@type": "Organization", "name": "Venturecore Solutions Private Limited" },
-        "address": { "@type": "PostalAddress", "addressLocality": "Basti", "addressRegion": "Uttar Pradesh", "postalCode": "272190", "addressCountry": "IN" }
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Basti",
+          "addressRegion": "Uttar Pradesh",
+          "postalCode": "272190",
+          "addressCountry": "IN"
+        }
       }
     </script>
   </head>

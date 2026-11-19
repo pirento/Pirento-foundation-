@@ -1,3 +1,4 @@
+// Bharat ID by Pirento (/api/auth/bharatid/*): sign-in and account linking over OpenID Connect.
 import { Router } from 'express';
 import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
@@ -15,7 +16,10 @@ import { notify, templates, siteUrl } from './mail.js';
  *    bharat_id (10-digit number), bharat_id_status (created | contact_confirmed | profile_submitted |
  *    pirento_reviewed | provider_verified | restricted | closed)
  */
-export const bharatIdOn = () => Boolean(process.env.BHARATID_ISSUER && process.env.BHARATID_CLIENT_ID && process.env.BHARATID_CLIENT_SECRET);
+export const bharatIdOn = () =>
+  Boolean(
+    process.env.BHARATID_ISSUER && process.env.BHARATID_CLIENT_ID && process.env.BHARATID_CLIENT_SECRET,
+  );
 export const COMPLETE = ['contact_confirmed', 'profile_submitted', 'pirento_reviewed', 'provider_verified'];
 
 const COOKIE = 'pf_oidc';
@@ -23,7 +27,9 @@ const redirectUri = () => `${siteUrl()}/api/auth/bharatid/callback`;
 let discovery;
 async function config() {
   if (!discovery) {
-    const r = await fetch(`${process.env.BHARATID_ISSUER.replace(/\/$/, '')}/.well-known/openid-configuration`);
+    const r = await fetch(
+      `${process.env.BHARATID_ISSUER.replace(/\/$/, '')}/.well-known/openid-configuration`,
+    );
     if (!r.ok) throw new Error(`Bharat ID discovery failed (${r.status})`);
     discovery = await r.json();
   }
@@ -32,7 +38,8 @@ async function config() {
 export const resetBharatIdDiscovery = () => (discovery = undefined);
 
 const safeNext = (n) => (typeof n === 'string' && n.startsWith('/') && !n.startsWith('//') ? n : null);
-const fail = (res, mode, message) => res.redirect(`${mode === 'link' ? '/dashboard/bharat-id' : '/login'}?error=${encodeURIComponent(message)}`);
+const fail = (res, mode, message) =>
+  res.redirect(`${mode === 'link' ? '/dashboard/bharat-id' : '/login'}?error=${encodeURIComponent(message)}`);
 
 /** Maps userinfo claims onto the stored Bharat ID record. */
 export const fromClaims = (c) => ({
@@ -54,8 +61,17 @@ router.get('/start', async (req, res) => {
   const state = crypto.randomBytes(16).toString('base64url');
   const verifier = crypto.randomBytes(32).toString('base64url');
   const challenge = crypto.createHash('sha256').update(verifier).digest('base64url');
-  const cookie = jwt.sign({ state, verifier, mode, next: safeNext(req.query.next), uid: req.user?._id && String(req.user._id) }, process.env.JWT_SECRET, { expiresIn: '10m' });
-  res.cookie(COOKIE, cookie, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: 10 * 60 * 1000 });
+  const cookie = jwt.sign(
+    { state, verifier, mode, next: safeNext(req.query.next), uid: req.user?._id && String(req.user._id) },
+    process.env.JWT_SECRET,
+    { expiresIn: '10m' },
+  );
+  res.cookie(COOKIE, cookie, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 10 * 60 * 1000,
+  });
   let cfg;
   try {
     cfg = await config();
@@ -85,7 +101,8 @@ router.get('/callback', async (req, res) => {
   }
   res.clearCookie(COOKIE);
   const { mode } = flow;
-  if (req.query.error || req.query.state !== flow.state || typeof req.query.code !== 'string') return fail(res, mode, 'Bharat ID sign-in was cancelled.');
+  if (req.query.error || req.query.state !== flow.state || typeof req.query.code !== 'string')
+    return fail(res, mode, 'Bharat ID sign-in was cancelled.');
 
   let claims;
   try {
@@ -118,7 +135,8 @@ router.get('/callback', async (req, res) => {
   if (mode === 'link') {
     const user = req.user && String(req.user._id) === flow.uid ? req.user : null;
     if (!user) return fail(res, 'login', 'Please sign in again to link your Bharat ID.');
-    if (owner && String(owner._id) !== String(user._id)) return fail(res, mode, 'This Bharat ID is already linked to another Pirento Foundation account.');
+    if (owner && String(owner._id) !== String(user._id))
+      return fail(res, mode, 'This Bharat ID is already linked to another Pirento Foundation account.');
     user.bharatId = { ...record, linkedAt: user.bharatId?.linkedAt ?? new Date() };
     await user.save();
     return res.redirect(`${flow.next || '/dashboard/bharat-id'}?bharatid=linked`);
@@ -131,8 +149,17 @@ router.get('/callback', async (req, res) => {
   }
   let created = false;
   if (!user) {
-    if (!record.email) return fail(res, mode, 'Your Bharat ID has no confirmed email yet. Confirm it on Bharat ID, then try again.');
-    user = new User({ name: record.name || record.email.split('@')[0], email: record.email, emailVerified: true });
+    if (!record.email)
+      return fail(
+        res,
+        mode,
+        'Your Bharat ID has no confirmed email yet. Confirm it on Bharat ID, then try again.',
+      );
+    user = new User({
+      name: record.name || record.email.split('@')[0],
+      email: record.email,
+      emailVerified: true,
+    });
     created = true;
   }
   if (user.role === 'admin') return fail(res, mode, 'Admin accounts sign in at /admin/login.');
