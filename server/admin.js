@@ -59,8 +59,8 @@ const csvCell = (v) => {
 
 router.get('/donations.csv', async (_req, res) => {
   const list = await Donation.find({ status: 'paid' }).sort({ paidAt: 1 }).lean();
-  const head = ['Receipt no', 'Date', 'Name', 'Email', 'Phone', 'PAN', 'Amount (INR)', 'Programme', 'Mode', 'Payment ID', 'Reference'];
-  const lines = list.map((d) => [d.receiptNo, d.paidAt?.toISOString().slice(0, 10), d.name, d.email, d.phone, d.pan, d.amount, d.programme, d.method, d.paymentId, d.reference].map(csvCell).join(','));
+  const head = ['Receipt no', 'Date', 'Name', 'Email', 'Phone', 'PAN', 'Address', 'Amount (INR)', 'Programme', 'Mode', 'Monthly', 'Payment ID', 'Reference'];
+  const lines = list.map((d) => [d.receiptNo, d.paidAt?.toISOString().slice(0, 10), d.name, d.email, d.phone, d.pan, d.address, d.amount, d.programme, d.method, d.subscription ? 'yes' : '', d.paymentId, d.reference].map(csvCell).join(','));
   res.type('text/csv').set('Content-Disposition', `attachment; filename="pirento-donations-${new Date().toISOString().slice(0, 10)}.csv"`);
   res.send([head.join(','), ...lines].join('\n'));
 });
