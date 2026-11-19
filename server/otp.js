@@ -73,7 +73,8 @@ async function sendSms(to, code) {
 }
 
 export const canSms = () => Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM);
-export const devCodes = () => process.env.NODE_ENV !== 'production';
+// Test codes are shown on screen only when explicitly enabled, and never in production.
+export const devCodes = () => process.env.DEV_SHOW_CODES === '1' && process.env.NODE_ENV !== 'production';
 
 /** Sends the code. Outside production with no provider set, returns the code so it can be shown on screen. */
 export async function deliver(channel, target, code, purpose = 'login') {

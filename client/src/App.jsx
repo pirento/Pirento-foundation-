@@ -36,7 +36,7 @@ function NotFound() {
 function EcosystemPage() {
   return (
     <Page title="Pirento ecosystem" description="How Pirento Foundation fits with Venturecore and pirento.com, and the future School and University of Pirento.">
-      <PageHero label="Ecosystem" lines={['Where the Foundation', 'fits in.']} intro="Venturecore Solutions Private Limited sponsors Pirento Foundation, a Section 8 company (registration pending). School of Pirento and University of Pirento are our future plans for education." />
+      <PageHero label="Ecosystem" lines={['Where the Foundation', 'fits in.']} intro="Venturecore Solutions Private Limited sponsors Pirento Foundation, a registered Section 8 company. Bharat ID by Pirento and Pirento One sit alongside it in the Pirento ecosystem; School of Pirento and University of Pirento are our future plans for education." />
       <div className="border-t border-rule"><Ecosystem /></div>
     </Page>
   );

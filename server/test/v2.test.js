@@ -37,7 +37,7 @@ globalThis.fetch = async (url, opts = {}) => {
 
 before(async () => {
   Object.assign(process.env, {
-    JWT_SECRET: 'z'.repeat(40), ADMIN_EMAIL: 'admin@test.in', ADMIN_PASSWORD: 'admin-pass-1', SITE_URL: 'http://pf.test',
+    DEV_SHOW_CODES: '1', JWT_SECRET: 'z'.repeat(40), ADMIN_EMAIL: 'admin@test.in', ADMIN_PASSWORD: 'admin-pass-1', SITE_URL: 'http://pf.test',
     RAZORPAY_KEY_ID: 'rzp_test', RAZORPAY_KEY_SECRET: SECRET, RAZORPAY_WEBHOOK_SECRET: 'wh',
     BHARATID_ISSUER: 'https://bharatid.test', BHARATID_CLIENT_ID: 'pf', BHARATID_CLIENT_SECRET: 's',
   });
@@ -172,4 +172,11 @@ test('guest donation, 80G receipt, monthly giving, membership, Bharat ID, settin
   assert.equal(post.status, 201);
   assert.equal((await call('GET', '/posts')).body.posts[0].slug, 'first-saplings-planted');
   assert.equal((await call('POST', '/admin/posts', { title: 'x', link: 'javascript:alert(1)' }, admin)).status, 400);
+
+  // Security: with no provider and no explicit opt-in, codes are never returned to the browser.
+  process.env.DEV_SHOW_CODES = '0';
+  const blocked = await call('POST', '/auth/otp/send', { channel: 'email', target: 'new@test.in', purpose: 'register' });
+  assert.equal(blocked.status, 503);
+  assert.equal(blocked.body.devCode, undefined);
+  process.env.DEV_SHOW_CODES = '1';
 });

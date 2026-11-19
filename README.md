@@ -28,7 +28,7 @@ npm run dev:server                   # API on :5000 (needs MongoDB at MONGODB_UR
 npm run dev:client                   # site on :5173, proxies /api to :5000
 npm test                             # end-to-end API test with an in-memory MongoDB
 ```
-The admin account in `ADMIN_EMAIL` is created on first start. Log in at `/login`, you land on `/admin`.
+The admin account in `ADMIN_EMAIL` is created on first start. Admins sign in at `/admin/login` (password, then an email code). For local testing set `DEV_SHOW_CODES=1` in `server/.env` so codes show on screen.
 
 ## Deploy (one Node service)
 `npm run build` then `npm start` with `NODE_ENV=production`. Express serves the API and `client/dist`.
@@ -40,7 +40,7 @@ The Bharat ID team registers this site as an OpenID Connect client. Needed from 
 ## Login providers
 - **Google:** set `GOOGLE_CLIENT_ID` (OAuth client, type Web; add your domain to Authorised JavaScript origins). The button appears automatically.
 - **Email OTP:** set `SMTP_*`. **Mobile OTP:** set `TWILIO_*` (Indian SMS needs a DLT-registered sender/template).
-- In development with no provider, codes are printed in the server log and shown on screen as "Test mode". In production without a provider, that channel refuses to send.
+- For local testing without a provider, set `DEV_SHOW_CODES=1`: codes are logged and shown on screen as "Test mode". Without it (and always when `NODE_ENV=production`) a channel with no provider refuses to send.
 
 ## Razorpay activation checklist
 Razorpay reviews the website before enabling live payments. It needs: Contact page (`/contact`), Terms (`/terms`), Privacy (`/privacy`), Refund & Cancellation (`/refund-policy`), and clear pricing (the donate form). All are live. Then set the live keys and the webhook secret.
@@ -52,5 +52,4 @@ Razorpay reviews the website before enabling live payments. It needs: Contact pa
 - Have a lawyer and your CA review `client/src/data/policies.js` and the 80G receipt wording, and name the Grievance Officer.
 - File Form 10BD each year from **Donations → Export CSV** (it includes PAN and address).
 - Set up the mailbox `support@pirentofoundation.org` and its SMTP login; add SPF, DKIM and DMARC records for the domain so emails don't land in spam.
-- The site says "Section 8 company (registration pending)" and "not eligible for 80G" everywhere. Update `brand` in `site.js` and the `LEGAL` line in `server/pdf.js` once registration, CIN and 80G arrive.
 - Confirm the Foundation phone number and the board offices (marked "to be confirmed").

@@ -11,7 +11,7 @@ let mongo, server, base;
 const SECRET = 'rzp_test_secret';
 
 before(async () => {
-  Object.assign(process.env, { JWT_SECRET: 'x'.repeat(40), ADMIN_EMAIL: 'admin@test.in', ADMIN_PASSWORD: 'admin-pass-1', RAZORPAY_KEY_ID: 'rzp_test', RAZORPAY_KEY_SECRET: SECRET, RAZORPAY_WEBHOOK_SECRET: 'whsec' });
+  Object.assign(process.env, { DEV_SHOW_CODES: '1', JWT_SECRET: 'x'.repeat(40), ADMIN_EMAIL: 'admin@test.in', ADMIN_PASSWORD: 'admin-pass-1', RAZORPAY_KEY_ID: 'rzp_test', RAZORPAY_KEY_SECRET: SECRET, RAZORPAY_WEBHOOK_SECRET: 'whsec' });
   mongo = await MongoMemoryServer.create();
   await mongoose.connect(mongo.getUri());
   await ensureAdmin();
