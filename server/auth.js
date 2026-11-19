@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
 import { User, Otp } from './models.js';
 import { httpError, normTarget, normPhone, createOtp, checkOtp, deliver, canEmail, canSms, devCodes } from './otp.js';
+import { notify, templates } from './mail.js';
 
 const COOKIE = 'pf_token';
 const secret = () => process.env.JWT_SECRET;
@@ -22,12 +23,13 @@ export const publicUser = (u) => ({
 });
 
 function setSession(res, user) {
-  const token = jwt.sign({ sub: String(user._id), role: user.role }, secret(), { expiresIn: '7d' });
+  const hours = user.role === 'admin' ? 12 : 7 * 24; // admin sessions are short
+  const token = jwt.sign({ sub: String(user._id), role: user.role }, secret(), { expiresIn: `${hours}h` });
   res.cookie(COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 7 * 24 * 3600 * 1000,
+    maxAge: hours * 3600 * 1000,
   });
   return res.json({ user: publicUser(user) });
 }
@@ -53,6 +55,10 @@ export const requireAdmin = (req, res, next) =>
 const checkPassword = (pw) => {
   if (typeof pw !== 'string' || pw.length < 8 || pw.length > 128) throw httpError(400, 'Password must be 8 to 128 characters.');
 };
+// Admins must use the two-step admin login, never the public sign-in routes.
+const notAdmin = (user) => {
+  if (user?.role === 'admin') throw httpError(403, 'Admin accounts sign in at /admin/login.');
+};
 const findByTarget = (channel, target) => User.findOne(channel === 'email' ? { email: target } : { phone: target });
 
 const router = Router();
@@ -72,7 +78,8 @@ router.post('/otp/send', sendLimiter, async (req, res) => {
   const label = channel === 'email' ? 'email' : 'mobile number';
   if (purpose === 'register' && exists) throw httpError(409, `An account with this ${label} already exists. Please sign in.`);
   if (purpose !== 'register' && !exists) throw httpError(404, `No account uses this ${label}. Create an account first.`);
-  const code = await deliver(channel, target, await createOtp(channel, target, purpose));
+  if (purpose === 'login') notAdmin(exists);
+  const code = await deliver(channel, target, await createOtp(channel, target, purpose), purpose);
   res.json({ sent: true, target, ...(typeof code === 'string' && { devCode: code }) });
 });
 
@@ -84,6 +91,7 @@ router.post('/otp/login', limiter, async (req, res) => {
   await otp.deleteOne();
   const user = await findByTarget(channel, target);
   if (!user) throw httpError(404, 'Account not found.');
+  notAdmin(user);
   user[channel === 'email' ? 'emailVerified' : 'phoneVerified'] = true;
   await user.save();
   setSession(res, user);
@@ -114,6 +122,7 @@ router.post('/register', limiter, async (req, res) => {
     throw httpError(409, 'An account with this email or mobile already exists.');
   const user = await User.create({ name, email, phone, emailVerified: true, phoneVerified: Boolean(phone), passwordHash: await bcrypt.hash(password, 12) });
   await Otp.deleteMany({ _id: { $in: proofs.map((o) => o._id) } });
+  notify({ to: user.email, ...templates.welcome(user) });
   res.status(201);
   setSession(res, user);
 });
@@ -123,6 +132,7 @@ router.post('/login', limiter, async (req, res) => {
   const { id, password } = req.body ?? {};
   const phone = normPhone(id);
   const user = phone ? await User.findOne({ phone }) : isEmail(id) ? await User.findOne({ email: id.toLowerCase().trim() }) : null;
+  notAdmin(user);
   if (user && !user.passwordHash) throw httpError(400, 'This account has no password yet. Sign in with Google or a code, or set one with “Forgot password”.');
   if (!user || typeof password !== 'string' || !(await bcrypt.compare(password, user.passwordHash)))
     throw httpError(401, 'Email/mobile or password is incorrect.');
@@ -140,6 +150,8 @@ router.post('/password/reset', limiter, async (req, res) => {
   user[channel === 'email' ? 'emailVerified' : 'phoneVerified'] = true;
   await user.save();
   await otp.deleteOne();
+  // An admin still has to pass the two-step admin login after a reset.
+  if (user.role === 'admin') return res.json({ user: null, admin: true });
   setSession(res, user);
 });
 
@@ -158,10 +170,34 @@ router.post('/google', limiter, async (req, res) => {
   let user = await User.findOne({ googleId: t.sub });
   if (!user) {
     user = await User.findOne({ email });
+    const created = !user;
     if (user) Object.assign(user, { googleId: t.sub, emailVerified: true });
     else user = new User({ name: t.name || email.split('@')[0], email, googleId: t.sub, emailVerified: true });
+    notAdmin(user); // before saving: an admin's Google id must not be linked
     await user.save();
+    if (created) notify({ to: user.email, ...templates.welcome(user) });
   }
+  notAdmin(user);
+  setSession(res, user);
+});
+
+/* ---------- admin: password, then a code sent to the admin's email ---------- */
+
+router.post('/admin/login', limiter, async (req, res) => {
+  const { email, password } = req.body ?? {};
+  const user = isEmail(email) ? await User.findOne({ email: email.toLowerCase().trim(), role: 'admin' }) : null;
+  if (!user?.passwordHash || typeof password !== 'string' || !(await bcrypt.compare(password, user.passwordHash)))
+    throw httpError(401, 'Email or password is incorrect.');
+  const code = await deliver('email', user.email, await createOtp('email', user.email, 'admin'), 'admin');
+  res.json({ otpSent: true, target: user.email, ...(typeof code === 'string' && { devCode: code }) });
+});
+
+router.post('/admin/verify', limiter, async (req, res) => {
+  const email = normTarget('email', req.body?.email);
+  const otp = await checkOtp(email, 'admin', req.body?.code);
+  await otp.deleteOne();
+  const user = await User.findOne({ email, role: 'admin' });
+  if (!user) throw httpError(403, 'Admin access only.');
   setSession(res, user);
 });
 

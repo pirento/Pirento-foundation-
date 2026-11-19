@@ -16,7 +16,8 @@ import Contact from './pages/Contact.jsx';
 import Verify from './pages/Verify.jsx';
 import Auth from './pages/Auth.jsx';
 import Dashboard from './pages/Dashboard.jsx';
-import Admin from './pages/Admin.jsx';
+import { AdminShell, AdminLogin } from './pages/Admin.jsx';
+import Policy from './pages/Policy.jsx';
 import Ecosystem from './components/Ecosystem.jsx';
 
 function NotFound() {
@@ -46,6 +47,17 @@ export default function App() {
     else scrollToTop();
   }, [pathname, hash]);
 
+  if (pathname.startsWith('/admin'))
+    return (
+      <>
+        <Cursor />
+        <Routes>
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/*" element={<RequireAuth admin><AdminShell /></RequireAuth>} />
+        </Routes>
+      </>
+    );
+
   return (
     <>
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-paper">
@@ -66,7 +78,9 @@ export default function App() {
         <Route path="/login" element={<Auth mode="login" />} />
         <Route path="/register" element={<Auth mode="register" />} />
         <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
-        <Route path="/admin" element={<RequireAuth admin><Admin /></RequireAuth>} />
+        <Route path="/terms" element={<Policy slug="terms" key="terms" />} />
+        <Route path="/privacy" element={<Policy slug="privacy" key="privacy" />} />
+        <Route path="/refund-policy" element={<Policy slug="refund-policy" key="refund" />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

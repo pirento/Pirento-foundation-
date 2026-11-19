@@ -7,9 +7,10 @@ export const brand = {
   legalForm: 'Section 8 company (registration pending)',
   sponsor: 'Venturecore Solutions Private Limited',
   sponsorCin: 'U63121UP2023PTC188021',
-  email: 'support@pirento.com',
+  email: 'support@pirentofoundation.org',
+  domain: 'pirentofoundation.org',
   phone: '+91 9988556861',
-  contactNote: 'Contact details to be confirmed for the Foundation.',
+  contactNote: 'Phone number to be confirmed.',
   office: 'C/o Sanjay Kumar, Village Mudila, Post Sihari Sardaha, Bhanpur, Basti, Uttar Pradesh 272190 (proposed)',
   area: 'Basti and eastern Uttar Pradesh first; Lucknow and wider India later.',
   pendingNote:
@@ -147,6 +148,7 @@ export const faqs = [
   { q: 'Do I need an account to donate?', a: 'No. An account just keeps all your receipts and certificates in one place.' },
   { q: 'How do I check a certificate is real?', a: 'Every certificate has a number. Enter it on the Verify page to see who it was issued to and whether it is still valid.' },
   { q: 'Can I give by bank transfer?', a: 'Yes. Write to us and we will share the Foundation’s bank details once the account is open, then record your gift and send your certificate.' },
+  { q: 'Can I get a refund?', a: 'Donations are normally final, but we refund duplicate charges, wrong amounts and unauthorised payments. See our Refund & Cancellation Policy.' },
 ];
 
 export const ecosystem = {
@@ -176,3 +178,10 @@ export const ecosystem = {
     },
   ],
 };
+
+export const legalLinks = [
+  { to: '/terms', label: 'Terms of Use' },
+  { to: '/privacy', label: 'Privacy Policy' },
+  { to: '/refund-policy', label: 'Refund & Cancellation' },
+];
+export const contactTopics = ['Partnership', 'CSR support', 'Volunteering', 'Donation or receipt', 'Privacy or data request', 'Grievance', 'Other'];

@@ -11,7 +11,7 @@ let mongo, server, base;
 const SECRET = 'rzp_test_secret';
 
 before(async () => {
-  Object.assign(process.env, { JWT_SECRET: 'x'.repeat(40), ADMIN_EMAIL: 'admin@test.in', ADMIN_PASSWORD: 'admin-pass-1', RAZORPAY_KEY_ID: 'rzp_test', RAZORPAY_KEY_SECRET: SECRET });
+  Object.assign(process.env, { JWT_SECRET: 'x'.repeat(40), ADMIN_EMAIL: 'admin@test.in', ADMIN_PASSWORD: 'admin-pass-1', RAZORPAY_KEY_ID: 'rzp_test', RAZORPAY_KEY_SECRET: SECRET, RAZORPAY_WEBHOOK_SECRET: 'whsec' });
   mongo = await MongoMemoryServer.create();
   await mongoose.connect(mongo.getUri());
   await ensureAdmin();
@@ -88,7 +88,16 @@ test('auth, donations, certificates and admin end to end', async () => {
   assert.equal(Buffer.from(pdf.body).subarray(0, 4).toString(), '%PDF');
 
   // Admin: offline donation, issue + revoke a certificate.
-  const admin = (await call('POST', '/auth/login', { id: 'admin@test.in', password: 'admin-pass-1' })).cookie;
+  // Admin: public sign-in refused; two-step admin login (password, then email code).
+  assert.equal((await call('POST', '/auth/login', { id: 'admin@test.in', password: 'admin-pass-1' })).status, 403);
+  assert.equal((await call('POST', '/auth/admin/login', { email: 'admin@test.in', password: 'nope-nope' })).status, 401);
+  assert.equal((await call('POST', '/auth/admin/login', { email: 'asha@test.in', password: 'newpassword1' })).status, 401, 'non-admins cannot use it');
+  const step1 = await call('POST', '/auth/admin/login', { email: 'admin@test.in', password: 'admin-pass-1' });
+  assert.equal(step1.status, 200);
+  assert.equal(step1.cookie, undefined, 'no session before the code');
+  const step2 = await call('POST', '/auth/admin/verify', { email: 'admin@test.in', code: step1.body.devCode });
+  assert.equal(step2.status, 200);
+  const admin = step2.cookie;
   assert.equal((await call('POST', '/admin/donations', { name: 'Ravi', email: 'ravi@test.in', amount: 5, method: 'cash' }, admin)).status, 400);
   const off = await call('POST', '/admin/donations', { name: 'Ravi', email: 'ravi@test.in', amount: 2000, method: 'bank', programme: 'food' }, admin);
   assert.equal(off.status, 201);
@@ -97,6 +106,26 @@ test('auth, donations, certificates and admin end to end', async () => {
   assert.equal((await call('GET', '/certificates/mine', null, user)).body.certificates.length, 2);
   const stats = (await call('GET', '/admin/stats', null, admin)).body;
   assert.deepEqual([stats.raised, stats.donations, stats.donors, stats.certificates], [2500, 2, 2, 3]);
+
+  // Webhook: a payment whose browser closed before /verify.
+  const d2 = await Donation.create({ name: 'Kiran', email: 'kiran@test.in', amount: 750, orderId: 'order_2' });
+  const evt = JSON.stringify({ event: 'payment.captured', payload: { payment: { entity: { id: 'pay_2', order_id: 'order_2', amount: 75000 } } } });
+  const hook = (sig) => fetch(base + '/donations/webhook', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Razorpay-Signature': sig }, body: evt });
+  assert.equal((await hook('0'.repeat(64))).status, 400);
+  assert.equal((await hook(crypto.createHmac('sha256', 'whsec').update(evt).digest('hex'))).status, 200);
+  const paid2 = await Donation.findById(d2.id);
+  assert.equal(paid2.status, 'paid');
+  assert.equal(paid2.paymentId, 'pay_2');
+
+  const csv = await call('GET', '/admin/donations.csv', null, admin);
+  assert.equal(Buffer.from(csv.body).toString().split('\n').length, 4, 'header + 3 paid donations');
+
+  // Contact form goes to the admin inbox.
+  assert.equal((await call('POST', '/contact', { name: 'X', email: 'x@test.in', topic: 'Other', message: 'short' })).status, 400);
+  assert.equal((await call('POST', '/contact', { name: 'Neha', email: 'neha@test.in', topic: 'Volunteering', message: 'I would like to help at the plantation.' })).status, 201);
+  const inbox = await call('GET', '/admin/messages', null, admin);
+  assert.equal(inbox.body.messages[0].topic, 'Volunteering');
+  assert.equal((await call('GET', '/admin/stats', null, admin)).body.newMessages, 1);
 
   await call('PATCH', `/admin/certificates/${vol.body.certificate._id}`, { revoked: true }, admin);
   assert.equal((await call('GET', `/certificates/verify/${vol.body.certificate.certNo}`)).body.certificate.revoked, true);

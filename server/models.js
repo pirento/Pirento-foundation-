@@ -58,11 +58,23 @@ const otpSchema = new Schema(
   {
     channel: { type: String, enum: ['email', 'phone'], required: true },
     target: { type: String, required: true, index: true },
-    purpose: { type: String, enum: ['login', 'register', 'reset'], required: true },
+    purpose: { type: String, enum: ['login', 'register', 'reset', 'admin'], required: true },
     codeHash: { type: String, required: true },
     attempts: { type: Number, default: 0 },
     verified: { type: Boolean, default: false },
     expiresAt: { type: Date, required: true, expires: 0 }, // MongoDB TTL deletes it after this time
+  },
+  { timestamps: true },
+);
+
+const messageSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 120 },
+    email: { type: String, required: true, lowercase: true, trim: true },
+    phone: { type: String, trim: true, maxlength: 20 },
+    topic: { type: String, required: true, maxlength: 60 },
+    message: { type: String, required: true, maxlength: 4000 },
+    status: { type: String, enum: ['new', 'done'], default: 'new', index: true },
   },
   { timestamps: true },
 );
@@ -74,6 +86,7 @@ export const Donation = model('Donation', donationSchema);
 export const Certificate = model('Certificate', certificateSchema);
 export const Counter = model('Counter', counterSchema);
 export const Otp = model('Otp', otpSchema);
+export const Message = model('Message', messageSchema);
 
 export async function nextReceiptNo(date = new Date()) {
   // Indian financial year runs April–March, so receipts restart each FY.

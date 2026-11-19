@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, Navigate, useSearchParams } from 'react-router';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
 import { Smartphone, Mail, Check, Eye, EyeOff, ArrowLeft, KeyRound } from 'lucide-react';
 import Page from '../components/Page.jsx';
 import { Button, Field, Notice } from '../components/ui.jsx';
@@ -95,7 +95,8 @@ const labelFor = (ch) => (ch === 'phone' ? 'Mobile number' : 'Email address');
 /* ---------- sign in ---------- */
 
 function SignIn({ cfg }) {
-  const { signIn } = useAuth();
+  const { signIn, setUser } = useAuth();
+  const navigate = useNavigate();
   const [view, setView] = useState('code'); // code | password | reset
   const [channel, setChannel] = useState(cfg.sms ? 'phone' : 'email');
   const [target, setTarget] = useState('');
@@ -180,7 +181,11 @@ function SignIn({ cfg }) {
           onSubmit={(code, newPassword, clear) =>
             run(async () => {
               try {
-                if (view === 'reset') await signIn('/auth/password/reset', { channel, target, code, password: newPassword });
+                if (view === 'reset') {
+                  const r = await api('/auth/password/reset', { method: 'POST', body: { channel, target, code, password: newPassword } });
+                  if (r.admin) return navigate('/admin/login?reset=1');
+                  setUser(r.user);
+                }
                 else await signIn('/auth/otp/login', { channel, target, code });
               } catch (e) {
                 clear?.();
@@ -321,7 +326,7 @@ function Register({ cfg }) {
         <Field label="Set a password" name="password" type="password" required minLength={8} autoComplete="new-password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} hint="At least 8 characters." />
         <label className="flex items-start gap-3 text-sm leading-relaxed text-muted">
           <input type="checkbox" checked={f.agree} onChange={(e) => setF({ ...f, agree: e.target.checked })} className="mt-1 size-4 accent-[var(--ink)]" />
-          <span>I agree that Pirento Foundation may store these details to run my account, receipts and certificates.</span>
+          <span>I agree to the <Link to="/terms" target="_blank" className="text-ink underline underline-offset-4">Terms of Use</Link> and <Link to="/privacy" target="_blank" className="text-ink underline underline-offset-4">Privacy Policy</Link> <span className="sr-only">(open in a new tab)</span>, and to Pirento Foundation storing these details to run my account, receipts and certificates.</span>
         </label>
         {state.error && <Notice kind="error">{state.error}</Notice>}
         <Button type="submit" variant="accent" disabled={!ready || state.busy} className="w-full">{state.busy ? 'Creating…' : 'Create account'}</Button>

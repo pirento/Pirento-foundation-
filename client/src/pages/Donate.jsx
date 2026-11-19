@@ -144,7 +144,11 @@ function DonateForm({ config }) {
       <Button type="submit" variant="accent" disabled={state.busy || !config.online} className="w-full sm:w-auto" cursor="Donate">
         {state.busy ? 'Opening payment…' : `Donate ${Number(form.amount) ? inr(form.amount) : ''}`}
       </Button>
-      <p className="text-xs leading-relaxed text-muted">{brand.pendingNote}</p>
+      <p className="text-xs leading-relaxed text-muted">
+        By donating you agree to our <Link to="/terms" className="underline underline-offset-2">Terms</Link>,{' '}
+        <Link to="/privacy" className="underline underline-offset-2">Privacy Policy</Link> and{' '}
+        <Link to="/refund-policy" className="underline underline-offset-2">Refund & Cancellation Policy</Link>. {brand.pendingNote}
+      </p>
     </form>
   );
 }

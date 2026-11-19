@@ -4,6 +4,10 @@ import rateLimit from 'express-rate-limit';
 import { Donation, Certificate, PROGRAMMES, nextReceiptNo } from './models.js';
 import { isEmail, requireUser } from './auth.js';
 import { certFromDonation, mineFilter } from './certificates.js';
+import { notify, templates } from './mail.js';
+import { PROGRAMME_NAMES } from './pdf.js';
+
+export const sendReceipt = (d, certNo) => notify({ to: d.email, ...templates.receipt(d, certNo, PROGRAMME_NAMES[d.programme] ?? d.programme) });
 
 const router = Router();
 const keyId = () => process.env.RAZORPAY_KEY_ID;
@@ -36,7 +40,9 @@ export async function markPaid(donation, extra) {
     await claimed.save();
     Object.assign(donation, claimed.toObject());
   }
-  return certFromDonation(donation);
+  const cert = await certFromDonation(donation);
+  sendReceipt(donation, cert.certNo);
+  return cert;
 }
 
 router.get('/config', (_req, res) => res.json({ online: Boolean(keyId() && keySecret()), keyId: keyId() ?? null, min: MIN_AMOUNT, max: MAX_AMOUNT }));
@@ -94,6 +100,28 @@ router.post('/verify', async (req, res) => {
   // Re-read so a request that lost the race still returns the winner's receipt and certificate.
   const [fresh, cert] = await Promise.all([Donation.findById(donation._id), Certificate.findOne({ donation: donation._id })]);
   res.json({ receiptNo: fresh.receiptNo, amount: fresh.amount, certNo: cert?.certNo });
+});
+
+/**
+ * Razorpay webhook (Dashboard → Settings → Webhooks, events: payment.captured, payment.failed).
+ * Catches payments whose browser closed before /verify ran.
+ */
+router.post('/webhook', async (req, res) => {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  const sig = req.get('x-razorpay-signature');
+  if (!secret || !req.rawBody || typeof sig !== 'string') return res.status(400).json({ error: 'Webhook not configured.' });
+  const expected = crypto.createHmac('sha256', secret).update(req.rawBody).digest('hex');
+  if (sig.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected)))
+    return res.status(400).json({ error: 'Bad signature.' });
+
+  const payment = req.body?.payload?.payment?.entity;
+  const donation = payment?.order_id ? await Donation.findOne({ orderId: payment.order_id }) : null;
+  if (donation && donation.status !== 'paid') {
+    if (req.body.event === 'payment.captured' && payment.amount === donation.amount * 100)
+      await markPaid(donation, { paymentId: payment.id, method: 'online' });
+    else if (req.body.event === 'payment.failed') await Donation.updateOne({ _id: donation._id, status: 'created' }, { status: 'failed' });
+  }
+  res.json({ ok: true }); // always 200 for valid events so Razorpay stops retrying
 });
 
 router.get('/mine', requireUser, async (req, res) => {

@@ -6,12 +6,14 @@ import authRoutes, { loadUser } from './auth.js';
 import donationRoutes from './donations.js';
 import certificateRoutes from './certificates.js';
 import adminRoutes from './admin.js';
+import contactRoutes from './contact.js';
 
 export function createApp() {
   const app = express();
   app.set('trust proxy', 1);
   app.disable('x-powered-by');
-  app.use(express.json({ limit: '50kb' }));
+  // rawBody is kept for the Razorpay webhook signature check.
+  app.use(express.json({ limit: '100kb', verify: (req, _res, buf) => (req.rawBody = buf) }));
   app.use(cookieParser());
   app.use(loadUser);
 
@@ -20,6 +22,7 @@ export function createApp() {
   app.use('/api/donations', donationRoutes);
   app.use('/api/certificates', certificateRoutes);
   app.use('/api/admin', adminRoutes);
+  app.use('/api/contact', contactRoutes);
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found.' }));
 
   // In production the built React app is served by the same server.

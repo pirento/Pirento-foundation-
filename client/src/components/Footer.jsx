@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { ArrowUp } from 'lucide-react';
-import { brand, nav, socials } from '../data/site.js';
+import { brand, nav, socials, legalLinks } from '../data/site.js';
 import { scrollToTop } from '../lib/motion.js';
 
 const more = [
@@ -57,7 +57,10 @@ export default function Footer() {
           <p>
             © {new Date().getFullYear()} {brand.name} · {brand.legalForm}. An initiative of {brand.sponsor}, CIN {brand.sponsorCin}.
           </p>
-          <p>Not yet eligible for 80G tax exemption.</p>
+          <p className="flex flex-wrap gap-x-4 gap-y-1">
+            {legalLinks.map((l) => <Link key={l.to} to={l.to} className="underline-offset-4 hover:text-on-inverse hover:underline">{l.label}</Link>)}
+            <span>Not yet eligible for 80G.</span>
+          </p>
         </div>
       </div>
     </footer>

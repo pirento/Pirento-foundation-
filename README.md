@@ -9,7 +9,10 @@ Content comes from *Profile, Work Plan & Governance* (Oct 2026) and lives in `cl
 - **Donations:** Razorpay checkout → server verifies the signature → numbered receipt (`PF/2026-27/00001`, resets each financial year) → donation certificate PDF.
 - **Accounts:** Google sign-in, email OTP, mobile OTP, or password. Sign-up verifies the email (and mobile, if given) with a 6-digit code; forgot-password resets by code. Codes are hashed, expire in 10 minutes, allow 5 tries and have a 30-second resend wait. Session is a JWT in an httpOnly cookie.
 - **Dashboard:** the user's donations and certificates, including gifts made earlier with the same (now verified) email.
-- **Admin login:** stats by programme, all donations, record offline gifts (bank / UPI / cash / cheque), issue volunteer / participation / appreciation certificates, revoke or restore, list users.
+- **Admin desk** (`/admin/login`, separate from the public site): password, then a 6-digit code to the admin's email; 12-hour sessions. Admin accounts cannot use the public sign-in. Sidebar pages: Overview (totals, by programme), Donations (record offline gifts, resend receipt, CSV export for accounts), Certificates (issue, revoke/restore), Messages (contact-form inbox), Users.
+- **Emails (HTML, mobile-friendly):** sign-in/verification codes, welcome, donation receipt with certificate link, certificate issued, contact-form acknowledgement, and a copy of every contact message to `support@pirentofoundation.org`. Emails never block a payment: if SMTP fails, the error is logged.
+- **Policies:** Terms of Use, Privacy Policy (DPDP Act 2023), Refund & Cancellation (also covers delivery, as Razorpay asks). Linked in the footer, sign-up and donate form.
+- **Razorpay webhook:** marks a donation paid even if the donor closes the browser before the success screen.
 - **Certificates:** A4 PDF generated on the fly, each with an unguessable number (`PFC-…`) and a public verify page at `/verify/<number>`.
 
 ## Run locally
@@ -31,8 +34,13 @@ Works on Render / Railway / any VPS with a MongoDB Atlas URI. Set `SITE_URL` to 
 - **Email OTP:** set `SMTP_*`. **Mobile OTP:** set `TWILIO_*` (Indian SMS needs a DLT-registered sender/template).
 - In development with no provider, codes are printed in the server log and shown on screen as "Test mode". In production without a provider, that channel refuses to send.
 
+## Razorpay activation checklist
+Razorpay reviews the website before enabling live payments. It needs: Contact page (`/contact`), Terms (`/terms`), Privacy (`/privacy`), Refund & Cancellation (`/refund-policy`), and clear pricing (the donate form). All are live. Then set the live keys and the webhook secret.
+
 ## Before going live
 - Online donations stay **off** until `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` are set; the form then shows a bank-transfer note.
-- Replace `YOUR-DOMAIN` in `client/index.html`, `public/robots.txt`, `public/sitemap.xml`, and add a 1200×630 `public/og.png`.
+- Domain is set to `pirentofoundation.org`. Add a 1200×630 `client/public/og.png` for link previews.
+- Have a lawyer review `client/src/data/policies.js` (written as a sound draft, not legal advice), and name the Grievance Officer.
+- Set up the mailbox `support@pirentofoundation.org` and its SMTP login; add SPF, DKIM and DMARC records for the domain so emails don't land in spam.
 - The site says "Section 8 company (registration pending)" and "not eligible for 80G" everywhere. Update `brand` in `site.js` and the `LEGAL` line in `server/pdf.js` once registration, CIN and 80G arrive.
-- Confirm the Foundation email/phone and the board offices (marked "to be confirmed").
+- Confirm the Foundation phone number and the board offices (marked "to be confirmed").

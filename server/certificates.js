@@ -3,11 +3,11 @@ import crypto from 'node:crypto';
 import { Certificate, Donation, User } from './models.js';
 import { renderCertificate } from './pdf.js';
 import { requireUser } from './auth.js';
+import { siteUrl } from './mail.js';
 
 // 16 hex chars = 64 bits: the number doubles as an unguessable link to the PDF.
 export const newCertNo = () => `PFC-${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
 
-export const siteUrl = () => (process.env.SITE_URL || 'http://localhost:5173').replace(/\/$/, '');
 
 export async function issueCertificate(fields) {
   if (!fields.user && fields.email) fields.user = (await User.findOne({ email: fields.email.toLowerCase() }))?._id;

@@ -1,6 +1,8 @@
 import crypto from 'node:crypto';
-import nodemailer from 'nodemailer';
 import { Otp } from './models.js';
+import { sendMail, templates, canEmail } from './mail.js';
+
+export { canEmail };
 
 export const httpError = (status, message) => Object.assign(new Error(message), { status, expose: true });
 
@@ -56,22 +58,6 @@ export async function checkOtp(target, purpose, code) {
   return otp;
 }
 
-let mailer;
-async function sendEmail(to, code) {
-  mailer ??= nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: Number(process.env.SMTP_PORT) === 465,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-  });
-  await mailer.sendMail({
-    from: process.env.MAIL_FROM || process.env.SMTP_USER,
-    to,
-    subject: `${code} is your Pirento Foundation code`,
-    text: `Your Pirento Foundation verification code is ${code}.\nIt expires in 10 minutes. Do not share it with anyone.`,
-  });
-}
-
 // SMS via Twilio's REST API. For Indian numbers, a DLT-registered sender and template are required by TRAI.
 async function sendSms(to, code) {
   const sid = process.env.TWILIO_ACCOUNT_SID;
@@ -86,13 +72,12 @@ async function sendSms(to, code) {
   }
 }
 
-export const canEmail = () => Boolean(process.env.SMTP_HOST);
 export const canSms = () => Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM);
 export const devCodes = () => process.env.NODE_ENV !== 'production';
 
 /** Sends the code. Outside production with no provider set, returns the code so it can be shown on screen. */
-export async function deliver(channel, target, code) {
-  if (channel === 'email' && canEmail()) return sendEmail(target, code);
+export async function deliver(channel, target, code, purpose = 'login') {
+  if (channel === 'email' && canEmail()) return sendMail({ to: target, ...templates.otp(code, purpose) });
   if (channel === 'phone' && canSms()) return sendSms(target, code);
   if (!devCodes()) throw httpError(503, channel === 'email' ? 'Email codes are not set up yet.' : 'SMS codes are not set up yet. Please use email.');
   console.log(`[dev] ${channel} code for ${target}: ${code}`);

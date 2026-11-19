@@ -13,6 +13,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
+    setUser,
     // Any auth endpoint that answers with { user } and sets the session cookie.
     signIn: async (path, body) => setUser((await api(path, { method: 'POST', body })).user),
     logout: async () => {
@@ -29,7 +30,7 @@ export function RequireAuth({ admin, children }) {
   const { user } = useAuth();
   const location = useLocation();
   if (user === undefined) return <div className="min-h-[60vh]" aria-busy="true" />;
-  if (!user) return <Navigate to={`/login?next=${encodeURIComponent(location.pathname)}`} replace />;
-  if (admin && user.role !== 'admin') return <Navigate to="/dashboard" replace />;
+  if (!user || (admin && user.role !== 'admin'))
+    return <Navigate to={admin ? '/admin/login' : `/login?next=${encodeURIComponent(location.pathname)}`} replace />;
   return children;
 }
