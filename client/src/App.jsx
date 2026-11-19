@@ -17,6 +17,7 @@ import Verify from './pages/Verify.jsx';
 import Auth from './pages/Auth.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Admin from './pages/Admin.jsx';
+import Ecosystem from './components/Ecosystem.jsx';
 
 function NotFound() {
   return (
@@ -24,6 +25,15 @@ function NotFound() {
       <PageHero label="404" lines={['This page', 'does not exist.']}>
         <div data-hero-after className="mt-10"><Button to="/">Back to home</Button></div>
       </PageHero>
+    </Page>
+  );
+}
+
+function EcosystemPage() {
+  return (
+    <Page title="Pirento ecosystem" description="How Pirento Foundation fits with Venturecore and pirento.com, and the future School and University of Pirento.">
+      <PageHero label="Ecosystem" lines={['Where the Foundation', 'fits in.']} intro="Venturecore Solutions Private Limited sponsors Pirento Foundation, a Section 8 company (registration pending). School of Pirento and University of Pirento are our future plans for education." />
+      <div className="border-t border-rule"><Ecosystem /></div>
     </Page>
   );
 }
@@ -48,6 +58,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/programmes" element={<Programmes />} />
+        <Route path="/ecosystem" element={<EcosystemPage />} />
         <Route path="/donate" element={<Donate />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/verify" element={<Verify />} />

@@ -13,8 +13,8 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
-    login: async (email, password) => setUser((await api('/auth/login', { method: 'POST', body: { email, password } })).user),
-    register: async (form) => setUser((await api('/auth/register', { method: 'POST', body: form })).user),
+    // Any auth endpoint that answers with { user } and sets the session cookie.
+    signIn: async (path, body) => setUser((await api(path, { method: 'POST', body })).user),
     logout: async () => {
       await api('/auth/logout', { method: 'POST' });
       setUser(null);

@@ -35,10 +35,37 @@ async function call(method, path, body, cookie) {
 }
 
 test('auth, donations, certificates and admin end to end', async () => {
-  const reg = await call('POST', '/auth/register', { name: 'Asha', email: 'asha@test.in', password: 'password1' });
+  // Register: email + mobile must both be verified by OTP first.
+  const form = { name: 'Asha', email: 'asha@test.in', phone: '98765 43210', password: 'password1', agree: true };
+  assert.equal((await call('POST', '/auth/register', form)).status, 400, 'unverified email must be refused');
+  for (const [channel, target] of [['email', form.email], ['phone', form.phone]]) {
+    const sent = await call('POST', '/auth/otp/send', { channel, target, purpose: 'register' });
+    assert.equal(sent.status, 200);
+    assert.match(sent.body.devCode, /^\d{6}$/);
+    const wrong = sent.body.devCode === '000000' ? '111111' : '000000';
+    assert.equal((await call('POST', '/auth/otp/verify', { channel, target, code: wrong })).status, 400);
+    assert.equal((await call('POST', '/auth/otp/verify', { channel, target, code: sent.body.devCode })).status, 200);
+  }
+  const reg = await call('POST', '/auth/register', form);
   assert.equal(reg.status, 201);
-  assert.equal((await call('POST', '/auth/register', { name: 'A', email: 'asha@test.in', password: 'password1' })).status, 409);
-  assert.equal((await call('POST', '/auth/login', { email: 'asha@test.in', password: 'wrong-pass' })).status, 401);
+  assert.equal(reg.body.user.phone, '+919876543210');
+  assert.equal((await call('POST', '/auth/otp/send', { channel: 'email', target: form.email, purpose: 'register' })).status, 409);
+  assert.equal((await call('POST', '/auth/login', { id: 'asha@test.in', password: 'wrong-pass' })).status, 401);
+  assert.equal((await call('POST', '/auth/login', { id: '9876543210', password: 'password1' })).status, 200);
+
+  // Sign in with a mobile code; unknown numbers are told to register.
+  assert.equal((await call('POST', '/auth/otp/send', { channel: 'phone', target: '9123456789', purpose: 'login' })).status, 404);
+  const lc = await call('POST', '/auth/otp/send', { channel: 'phone', target: '+91 98765 43210', purpose: 'login' });
+  assert.equal((await call('POST', '/auth/otp/send', { channel: 'phone', target: '9876543210', purpose: 'login' })).status, 429, '30s cooldown');
+  const otpLogin = await call('POST', '/auth/otp/login', { channel: 'phone', target: '9876543210', code: lc.body.devCode });
+  assert.equal(otpLogin.status, 200);
+  assert.equal((await call('POST', '/auth/otp/login', { channel: 'phone', target: '9876543210', code: lc.body.devCode })).status, 400, 'codes are single-use');
+
+  // Forgot password via email code.
+  const rc = await call('POST', '/auth/otp/send', { channel: 'email', target: form.email, purpose: 'reset' });
+  assert.equal((await call('POST', '/auth/password/reset', { channel: 'email', target: form.email, code: rc.body.devCode, password: 'newpassword1' })).status, 200);
+  assert.equal((await call('POST', '/auth/login', { id: form.email, password: 'newpassword1' })).status, 200);
+  assert.equal((await call('POST', '/auth/google', { credential: 'x' })).status, 503, 'Google is off without a client id');
   const user = reg.cookie;
   assert.equal((await call('GET', '/auth/me', null, user)).body.user.role, 'user');
   assert.equal((await call('GET', '/admin/stats', null, user)).status, 403);
@@ -61,7 +88,7 @@ test('auth, donations, certificates and admin end to end', async () => {
   assert.equal(Buffer.from(pdf.body).subarray(0, 4).toString(), '%PDF');
 
   // Admin: offline donation, issue + revoke a certificate.
-  const admin = (await call('POST', '/auth/login', { email: 'admin@test.in', password: 'admin-pass-1' })).cookie;
+  const admin = (await call('POST', '/auth/login', { id: 'admin@test.in', password: 'admin-pass-1' })).cookie;
   assert.equal((await call('POST', '/admin/donations', { name: 'Ravi', email: 'ravi@test.in', amount: 5, method: 'cash' }, admin)).status, 400);
   const off = await call('POST', '/admin/donations', { name: 'Ravi', email: 'ravi@test.in', amount: 2000, method: 'bank', programme: 'food' }, admin);
   assert.equal(off.status, 201);

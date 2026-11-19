@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 import '@fontsource-variable/space-grotesk';
 import '@fontsource-variable/inter';
+import '@fontsource/anton';
 import './index.css';
 import App from './App.jsx';
 import { AuthProvider } from './lib/auth.jsx';

@@ -24,11 +24,14 @@ export const certFromDonation = (d) =>
     donation: d._id,
   });
 
+/** Records belong to a user by id, or by email once that email is verified (covers gifts made before signing up). */
+export const mineFilter = (u) => [{ user: u._id }, ...(u.emailVerified ? [{ email: u.email }] : [])];
+
 const router = Router();
 const validNo = (no) => /^PFC-[0-9A-F]{16}$/.test(no);
 
 router.get('/mine', requireUser, async (req, res) => {
-  res.json({ certificates: await Certificate.find({ user: req.user._id }).sort({ createdAt: -1 }).lean() });
+  res.json({ certificates: await Certificate.find({ $or: mineFilter(req.user) }).sort({ createdAt: -1 }).lean() });
 });
 
 router.get('/verify/:certNo', async (req, res) => {

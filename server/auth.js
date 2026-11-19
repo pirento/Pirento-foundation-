@@ -2,13 +2,24 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
-import { User } from './models.js';
+import { User, Otp } from './models.js';
+import { httpError, normTarget, normPhone, createOtp, checkOtp, deliver, canEmail, canSms, devCodes } from './otp.js';
 
 const COOKIE = 'pf_token';
 const secret = () => process.env.JWT_SECRET;
 const isEmail = (s) => typeof s === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) && s.length <= 254;
 
-export const publicUser = (u) => ({ id: u._id, name: u.name, email: u.email, phone: u.phone, role: u.role });
+export const publicUser = (u) => ({
+  id: u._id,
+  name: u.name,
+  email: u.email,
+  phone: u.phone,
+  role: u.role,
+  emailVerified: u.emailVerified,
+  phoneVerified: u.phoneVerified,
+  hasPassword: Boolean(u.passwordHash),
+  google: Boolean(u.googleId),
+});
 
 function setSession(res, user) {
   const token = jwt.sign({ sub: String(user._id), role: user.role }, secret(), { expiresIn: '7d' });
@@ -18,6 +29,7 @@ function setSession(res, user) {
     secure: process.env.NODE_ENV === 'production',
     maxAge: 7 * 24 * 3600 * 1000,
   });
+  return res.json({ user: publicUser(user) });
 }
 
 // Attaches req.user when a valid session cookie exists; never rejects.
@@ -38,28 +50,119 @@ export const requireUser = (req, res, next) => (req.user ? next() : res.status(4
 export const requireAdmin = (req, res, next) =>
   req.user?.role === 'admin' ? next() : res.status(req.user ? 403 : 401).json({ error: 'Admin access only.' });
 
-const router = Router();
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 20, standardHeaders: true, legacyHeaders: false });
+const checkPassword = (pw) => {
+  if (typeof pw !== 'string' || pw.length < 8 || pw.length > 128) throw httpError(400, 'Password must be 8 to 128 characters.');
+};
+const findByTarget = (channel, target) => User.findOne(channel === 'email' ? { email: target } : { phone: target });
 
-router.post('/register', limiter, async (req, res) => {
-  const { name, email, password, phone } = req.body ?? {};
-  if (!name?.trim() || !isEmail(email)) return res.status(400).json({ error: 'Name and a valid email are required.' });
-  if (typeof password !== 'string' || password.length < 8 || password.length > 128)
-    return res.status(400).json({ error: 'Password must be 8 to 128 characters.' });
-  if (await User.exists({ email: email.toLowerCase() }))
-    return res.status(409).json({ error: 'An account with this email already exists.' });
-  const user = await User.create({ name, email, phone, passwordHash: await bcrypt.hash(password, 12) });
-  setSession(res, user);
-  res.status(201).json({ user: publicUser(user) });
+const router = Router();
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: true, legacyHeaders: false });
+const sendLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false, message: { error: 'Too many codes requested. Please try again in 15 minutes.' } });
+
+router.get('/config', (_req, res) =>
+  res.json({ googleClientId: process.env.GOOGLE_CLIENT_ID || null, email: canEmail() || devCodes(), sms: canSms() || devCodes(), devCodes: devCodes() }),
+);
+
+/** Step 1 of any code flow: purpose = login | register | reset. */
+router.post('/otp/send', sendLimiter, async (req, res) => {
+  const { channel, purpose } = req.body ?? {};
+  if (!['login', 'register', 'reset'].includes(purpose)) throw httpError(400, 'Unknown request.');
+  const target = normTarget(channel, req.body.target);
+  const exists = await findByTarget(channel, target);
+  const label = channel === 'email' ? 'email' : 'mobile number';
+  if (purpose === 'register' && exists) throw httpError(409, `An account with this ${label} already exists. Please sign in.`);
+  if (purpose !== 'register' && !exists) throw httpError(404, `No account uses this ${label}. Create an account first.`);
+  const code = await deliver(channel, target, await createOtp(channel, target, purpose));
+  res.json({ sent: true, target, ...(typeof code === 'string' && { devCode: code }) });
 });
 
-router.post('/login', limiter, async (req, res) => {
-  const { email, password } = req.body ?? {};
-  const user = isEmail(email) ? await User.findOne({ email: email.toLowerCase() }) : null;
-  if (!user || typeof password !== 'string' || !(await bcrypt.compare(password, user.passwordHash)))
-    return res.status(401).json({ error: 'Email or password is incorrect.' });
+/** Sign in with a code sent to email or mobile. */
+router.post('/otp/login', limiter, async (req, res) => {
+  const { channel, code } = req.body ?? {};
+  const target = normTarget(channel, req.body.target);
+  const otp = await checkOtp(target, 'login', code);
+  await otp.deleteOne();
+  const user = await findByTarget(channel, target);
+  if (!user) throw httpError(404, 'Account not found.');
+  user[channel === 'email' ? 'emailVerified' : 'phoneVerified'] = true;
+  await user.save();
   setSession(res, user);
-  res.json({ user: publicUser(user) });
+});
+
+/** Registration: mark an email or mobile as verified before the account is created. */
+router.post('/otp/verify', limiter, async (req, res) => {
+  const { channel, code } = req.body ?? {};
+  const target = normTarget(channel, req.body.target);
+  const otp = await checkOtp(target, 'register', code);
+  otp.verified = true;
+  otp.expiresAt = new Date(Date.now() + 30 * 60 * 1000); // time to finish the form
+  await otp.save();
+  res.json({ verified: true, target });
+});
+
+router.post('/register', limiter, async (req, res) => {
+  const { name, password, agree } = req.body ?? {};
+  if (!name?.trim()) throw httpError(400, 'Please enter your full name.');
+  const email = normTarget('email', req.body.email);
+  const phone = req.body.phone ? normTarget('phone', req.body.phone) : undefined;
+  checkPassword(password);
+  if (!agree) throw httpError(400, 'Please accept the terms and privacy policy.');
+  const proofs = await Otp.find({ purpose: 'register', verified: true, target: { $in: [email, phone].filter(Boolean) } });
+  if (!proofs.some((o) => o.target === email)) throw httpError(400, 'Please verify your email address first.');
+  if (phone && !proofs.some((o) => o.target === phone)) throw httpError(400, 'Please verify your mobile number first.');
+  if (await User.exists({ $or: [{ email }, ...(phone ? [{ phone }] : [])] }))
+    throw httpError(409, 'An account with this email or mobile already exists.');
+  const user = await User.create({ name, email, phone, emailVerified: true, phoneVerified: Boolean(phone), passwordHash: await bcrypt.hash(password, 12) });
+  await Otp.deleteMany({ _id: { $in: proofs.map((o) => o._id) } });
+  res.status(201);
+  setSession(res, user);
+});
+
+/** Password sign-in with email or mobile. */
+router.post('/login', limiter, async (req, res) => {
+  const { id, password } = req.body ?? {};
+  const phone = normPhone(id);
+  const user = phone ? await User.findOne({ phone }) : isEmail(id) ? await User.findOne({ email: id.toLowerCase().trim() }) : null;
+  if (user && !user.passwordHash) throw httpError(400, 'This account has no password yet. Sign in with Google or a code, or set one with “Forgot password”.');
+  if (!user || typeof password !== 'string' || !(await bcrypt.compare(password, user.passwordHash)))
+    throw httpError(401, 'Email/mobile or password is incorrect.');
+  setSession(res, user);
+});
+
+router.post('/password/reset', limiter, async (req, res) => {
+  const { channel, code, password } = req.body ?? {};
+  const target = normTarget(channel, req.body.target);
+  checkPassword(password);
+  const otp = await checkOtp(target, 'reset', code);
+  const user = await findByTarget(channel, target);
+  if (!user) throw httpError(404, 'Account not found.');
+  user.passwordHash = await bcrypt.hash(password, 12);
+  user[channel === 'email' ? 'emailVerified' : 'phoneVerified'] = true;
+  await user.save();
+  await otp.deleteOne();
+  setSession(res, user);
+});
+
+/** Google Identity Services: the browser sends Google's signed ID token; Google confirms it. */
+router.post('/google', limiter, async (req, res) => {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) throw httpError(503, 'Google sign-in is not set up yet.');
+  const credential = req.body?.credential;
+  if (typeof credential !== 'string' || credential.length > 4096) throw httpError(400, 'Missing Google credential.');
+  const r = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+  const t = r.ok ? await r.json() : null;
+  const valid =
+    t && t.aud === clientId && ['accounts.google.com', 'https://accounts.google.com'].includes(t.iss) && t.email_verified === 'true' && Number(t.exp) * 1000 > Date.now();
+  if (!valid) throw httpError(401, 'Google sign-in failed. Please try again.');
+  const email = t.email.toLowerCase();
+  let user = await User.findOne({ googleId: t.sub });
+  if (!user) {
+    user = await User.findOne({ email });
+    if (user) Object.assign(user, { googleId: t.sub, emailVerified: true });
+    else user = new User({ name: t.name || email.split('@')[0], email, googleId: t.sub, emailVerified: true });
+    await user.save();
+  }
+  setSession(res, user);
 });
 
 router.post('/logout', (_req, res) => {
@@ -82,7 +185,7 @@ export async function ensureAdmin() {
   }
   const pw = process.env.ADMIN_PASSWORD;
   if (!pw || pw.length < 8) return console.warn('ADMIN_PASSWORD (8+ chars) is needed to create the admin account.');
-  await User.create({ name: 'Admin', email, role: 'admin', passwordHash: await bcrypt.hash(pw, 12) });
+  await User.create({ name: 'Admin', email, role: 'admin', emailVerified: true, passwordHash: await bcrypt.hash(pw, 12) });
   console.log(`Admin account created for ${email}`);
 }
 

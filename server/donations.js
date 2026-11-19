@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import rateLimit from 'express-rate-limit';
 import { Donation, Certificate, PROGRAMMES, nextReceiptNo } from './models.js';
 import { isEmail, requireUser } from './auth.js';
-import { certFromDonation } from './certificates.js';
+import { certFromDonation, mineFilter } from './certificates.js';
 
 const router = Router();
 const keyId = () => process.env.RAZORPAY_KEY_ID;
@@ -97,7 +97,7 @@ router.post('/verify', async (req, res) => {
 });
 
 router.get('/mine', requireUser, async (req, res) => {
-  const donations = await Donation.find({ user: req.user._id, status: 'paid' }).sort({ createdAt: -1 }).lean();
+  const donations = await Donation.find({ status: 'paid', $or: mineFilter(req.user) }).sort({ createdAt: -1 }).lean();
   const certs = await Certificate.find({ donation: { $in: donations.map((d) => d._id) } }, 'donation certNo').lean();
   const byDonation = Object.fromEntries(certs.map((c) => [String(c.donation), c.certNo]));
   res.json({ donations: donations.map((d) => ({ ...d, certNo: byDonation[String(d._id)] })) });

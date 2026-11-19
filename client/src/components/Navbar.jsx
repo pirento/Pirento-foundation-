@@ -10,7 +10,7 @@ import { Button } from './ui.jsx';
 
 export function Logo({ className = '' }) {
   return (
-    <Link to="/" className={`inline-flex items-center gap-2.5 font-display text-[0.95rem] font-semibold uppercase tracking-[0.04em] ${className}`}>
+    <Link to="/" className={`inline-flex items-center gap-2.5 whitespace-nowrap font-display text-[0.95rem] font-semibold uppercase tracking-[0.04em] ${className}`}>
       <span aria-hidden className="size-2.5 rounded-[3px] bg-accent ring-1 ring-ink" />
       {brand.name}
     </Link>
@@ -57,7 +57,7 @@ function PillNav() {
     setPill(active ? { left: active.offsetLeft, width: active.offsetWidth } : null);
   }, [pathname]);
   return (
-    <nav aria-label="Main" ref={wrap} className="relative hidden items-center rounded-full border border-rule p-1 lg:flex">
+    <nav aria-label="Main" ref={wrap} className="relative hidden items-center rounded-full border border-rule p-1 xl:flex">
       {pill && <span aria-hidden className="absolute inset-y-1 rounded-full bg-ink transition-all duration-500 ease-ui" style={pill} />}
       {nav.map((n) => (
         <NavLink key={n.to} to={n.to} end className={({ isActive }) => `relative rounded-full px-4 py-2 text-sm transition-colors duration-300 ${isActive ? 'active text-paper' : 'text-muted hover:text-ink'}`}>
@@ -87,7 +87,7 @@ function MobileMenu({ open, onClose }) {
 
   const links = [...nav, user ? { to: user.role === 'admin' ? '/admin' : '/dashboard', label: 'My account' } : { to: '/login', label: 'Log in' }, { to: '/donate', label: 'Donate' }];
   return (
-    <div ref={panel} id="mobile-menu" inert={!open} style={{ clipPath: 'inset(0 0 100% 0)' }} className="fixed inset-0 z-40 flex flex-col bg-paper px-5 pb-8 pt-24 sm:px-8 lg:hidden">
+    <div ref={panel} id="mobile-menu" inert={!open} style={{ clipPath: 'inset(0 0 100% 0)' }} className="fixed inset-0 z-40 flex flex-col bg-paper px-5 pb-8 pt-24 sm:px-8 xl:hidden">
       <nav aria-label="Mobile" className="flex-1">
         <ul>
           {links.map((n, i) => (
@@ -135,7 +135,7 @@ export default function Navbar() {
           <Logo />
           <PillNav />
           <div className="flex items-center gap-2">
-            <span className="mr-2 hidden items-center gap-2 rounded-full border border-rule px-3 py-1.5 text-xs xl:inline-flex">
+            <span className="mr-2 hidden items-center gap-2 rounded-full border border-rule px-3 py-1.5 text-xs 2xl:inline-flex">
               <span className="relative size-1.5 rounded-full bg-accent"><span aria-hidden className="pulse absolute inset-0 rounded-full bg-accent" /></span>
               {brand.status}
             </span>
@@ -150,7 +150,7 @@ export default function Navbar() {
             <Button to="/donate" variant="accent" className="hidden !py-2.5 sm:inline-flex" cursor="Donate">
               Donate
             </Button>
-            <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? 'Close menu' : 'Open menu'} className="grid size-10 place-items-center rounded-full border border-rule lg:hidden">
+            <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? 'Close menu' : 'Open menu'} className="grid size-10 place-items-center rounded-full border border-rule xl:hidden">
               {open ? <X aria-hidden className="size-4" /> : <Menu aria-hidden className="size-4" />}
             </button>
           </div>

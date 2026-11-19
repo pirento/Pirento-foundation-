@@ -20,6 +20,7 @@ export const nav = [
   { to: '/', label: 'Home' },
   { to: '/about', label: 'About' },
   { to: '/programmes', label: 'Programmes' },
+  { to: '/ecosystem', label: 'Ecosystem' },
   { to: '/verify', label: 'Verify' },
   { to: '/contact', label: 'Contact' },
 ];
@@ -147,3 +148,31 @@ export const faqs = [
   { q: 'How do I check a certificate is real?', a: 'Every certificate has a number. Enter it on the Verify page to see who it was issued to and whether it is still valid.' },
   { q: 'Can I give by bank transfer?', a: 'Yes. Write to us and we will share the Foundation’s bank details once the account is open, then record your gift and send your certificate.' },
 ];
+
+export const ecosystem = {
+  site: { label: 'pirento.com', href: 'https://pirento.com', text: 'The main Pirento website.' },
+  parent: {
+    name: 'Venturecore Solutions Private Limited',
+    meta: 'Sponsor company · CIN U63121UP2023PTC188021',
+    text: 'Gives the initial corpus and brand licence. Its directors form the Foundation’s first board.',
+  },
+  foundation: {
+    name: 'Pirento Foundation',
+    meta: 'Section 8 company · registration pending',
+    text: 'The charitable arm. Its own bank account, its own books, its own decisions. You are on its website.',
+  },
+  future: [
+    {
+      name: 'School of Pirento',
+      place: 'Lucknow',
+      stage: '3–7 years',
+      text: 'A school for children from the communities we serve. Planned only after land, recognition and board approvals are in place.',
+    },
+    {
+      name: 'University of Pirento',
+      place: 'Lucknow',
+      stage: 'Long term',
+      text: 'Higher education and skills, built on what the school and scholarships teach us. Planned only after lawful establishment and UGC approval.',
+    },
+  ],
+};

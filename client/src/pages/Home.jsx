@@ -6,6 +6,7 @@ import { HeroArt } from '../components/Art.jsx';
 import { Button, Hl, SectionHeader, StatusBadge, Tag, Lines, Label } from '../components/ui.jsx';
 import { brand, mission, programmes, roadmap, governance, donateSteps } from '../data/site.js';
 import { Timeline } from './About.jsx';
+import Ecosystem from '../components/Ecosystem.jsx';
 
 function Hero() {
   const visual = useRef(null);
@@ -17,34 +18,51 @@ function Hero() {
     visual.current.style.transform = `perspective(1200px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg)`;
   };
   return (
-    <section className="relative overflow-hidden pb-24 pt-36 md:pb-32 md:pt-44">
-      <div aria-hidden className="grid-bg absolute inset-0 -z-10" />
-      <div className="container-x grid items-center gap-14 lg:grid-cols-12">
-        <div className="lg:col-span-7">
-          <p data-hero-after className="eyebrow">
-            {brand.legalForm} · Basti, Uttar Pradesh
-          </p>
-          <h1 data-hero className="h-hero mt-6">
-            <span className="line"><span>People. Planet.</span></span>
-            <span className="line"><span><Hl>Possibility.</Hl></span></span>
-          </h1>
-          <p data-hero-after className="prose-body mt-8">
-            We plant <strong>trees that survive</strong>, get <strong>food to families on time</strong>, and help students stay in school, starting in Basti and eastern Uttar Pradesh. Every rupee gets a receipt and every gift a certificate you can verify.
-          </p>
-          <div data-hero-after className="mt-10 flex flex-wrap gap-3">
-            <Button to="/donate" variant="accent" cursor="Donate">Donate now</Button>
-            <Button to="/programmes" variant="outline">See our programmes</Button>
+    <section className="pb-20 pt-[84px] md:pb-28">
+      <div className="container-x">
+        <div className="inverse relative overflow-hidden rounded-[28px] bg-inverse px-6 pb-8 pt-8 text-on-inverse sm:px-10 md:px-14 md:pb-12 md:pt-12">
+          <div aria-hidden className="absolute inset-0 opacity-25 [background-image:linear-gradient(var(--inverse-rule)_1px,transparent_1px),linear-gradient(90deg,var(--inverse-rule)_1px,transparent_1px)] [background-size:72px_72px]" />
+          <div className="relative flex flex-wrap items-start justify-between gap-4">
+            <p data-hero-after className="text-sm leading-snug">
+              green /<br />food /<br />education
+              <span aria-hidden className="mt-3 block h-0.5 w-8 bg-on-inverse" />
+            </p>
+            <p data-hero-after className="max-w-[16rem] text-right text-xs leading-relaxed text-inverse-muted">
+              {brand.legalForm}
+              <br />Basti, Uttar Pradesh
+            </p>
+          </div>
+
+          <div className="relative mt-6 grid items-end gap-10 md:mt-2 lg:grid-cols-12">
+            <div className="lg:col-span-7">
+              <h1 data-hero className="poster h-poster">
+                <span className="line"><span>People.</span></span>
+                <span className="line"><span>Planet.</span></span>
+                <span className="line"><span className="text-accent">Possibility.</span></span>
+              </h1>
+              <p data-hero-after className="mt-8 max-w-md text-[1.05rem] leading-relaxed text-inverse-muted">
+                We plant <strong className="font-medium text-on-inverse">trees that survive</strong>, get <strong className="font-medium text-on-inverse">food to families on time</strong>, and help students stay in school. Every rupee gets a receipt; every gift a certificate you can verify.
+              </p>
+              <div data-hero-after className="mt-8 flex flex-wrap gap-3">
+                <Button to="/donate" variant="accent" cursor="Donate">Donate now</Button>
+                <Button to="/ecosystem" variant="outline" className="!border-inverse-rule !text-on-inverse [--wipe:var(--on-inverse)] hover:!text-inverse">Pirento ecosystem</Button>
+              </div>
+            </div>
+            <div data-hero-visual className="lg:col-span-5" onPointerMove={tilt} onPointerLeave={() => (visual.current.style.transform = '')}>
+              <div ref={visual} className="overflow-hidden rounded-[22px] border border-inverse-rule shadow-[0_30px_80px_-40px_rgba(2,20,40,0.6)] transition-transform duration-500 ease-ui">
+                <HeroArt />
+              </div>
+            </div>
+          </div>
+
+          <div aria-hidden data-hero-after className="relative mt-10 flex items-end justify-between gap-6 border-t border-inverse-rule pt-6">
+            <p className="poster text-[clamp(1.6rem,3.4vw,2.8rem)]">Plant · Feed · Teach</p>
+            <p className="poster flex items-end gap-2 text-right leading-[0.85]">
+              <span className="text-[clamp(2.4rem,5vw,4.5rem)]">01</span>
+              <span className="pb-1 text-left text-[clamp(0.9rem,1.4vw,1.25rem)]">Pilot<br />year</span>
+            </p>
           </div>
         </div>
-        <div data-hero-visual className="lg:col-span-5" onPointerMove={tilt} onPointerLeave={() => (visual.current.style.transform = '')}>
-          <div ref={visual} className="overflow-hidden rounded-[22px] border border-rule shadow-[0_30px_80px_-40px_rgba(15,38,32,0.4)] transition-transform duration-500 ease-ui">
-            <HeroArt />
-          </div>
-        </div>
-      </div>
-      <div aria-hidden className="container-x mt-16 hidden items-center gap-3 text-xs text-muted md:flex">
-        <span className="relative block h-10 w-px overflow-hidden bg-rule"><span className="scroll-line absolute inset-0 bg-ink" /></span>
-        Scroll
       </div>
     </section>
   );
@@ -82,7 +100,7 @@ function HowToGive() {
   return (
     <section className="inverse bg-inverse py-28 text-on-inverse md:py-40">
       <div className="container-x">
-        <SectionHeader n={2} label="How giving works" inverse lines={['Give in a minute.', 'Keep the proof forever.']} intro="Your receipt and certificate are generated the moment your payment is confirmed." />
+        <SectionHeader n={3} label="How giving works" inverse lines={['Give in a minute.', 'Keep the proof forever.']} intro="Your receipt and certificate are generated the moment your payment is confirmed." />
         <ol className="relative mt-20 grid gap-12 md:grid-cols-3 md:gap-8">
           <span aria-hidden className="absolute left-0 right-0 top-5 hidden h-px bg-inverse-rule md:block" />
           {donateSteps.map((s, i) => (
@@ -106,7 +124,7 @@ function Trust() {
   return (
     <section className="py-28 md:py-40">
       <div className="container-x">
-        <SectionHeader n={3} label="Governance" lines={['Our money stays separate.', <>Our books stay <Hl>open</Hl>.</>]} intro={mission} />
+        <SectionHeader n={4} label="Governance" lines={['Our money stays separate.', <>Our books stay <Hl>open</Hl>.</>]} intro={mission} />
         <div className="mt-16 grid gap-px overflow-hidden rounded-[22px] border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-3">
           {governance.map((g) => (
             <div key={g.title} data-reveal className="bg-paper p-7 md:p-9">
@@ -125,7 +143,7 @@ function Roadmap() {
     <section className="border-t border-rule py-28 md:py-40">
       <div className="container-x grid gap-12 md:grid-cols-12">
         <div className="md:col-span-4">
-          <Label n={4}>Roadmap</Label>
+          <Label n={5}>Roadmap</Label>
           <Lines lines={['Pilot first.', 'Scale on proof.']} className="h-section mt-6" />
           <div data-reveal className="mt-6 flex gap-2"><StatusBadge status="Now" /><StatusBadge status="Expected" /></div>
         </div>
@@ -142,7 +160,7 @@ export function FinalCta() {
     <section className="inverse border-b border-inverse-rule bg-inverse py-28 text-on-inverse md:py-40">
       <div className="container-x">
         <Label n="—">Get involved</Label>
-        <Lines lines={['Plant one.', 'Feed one.', 'Teach one.']} className="h-cta mt-8" />
+        <Lines lines={['Plant one.', 'Feed one.', <span className="text-accent">Teach one.</span>]} className="poster h-cta mt-8" />
         <div data-reveal className="mt-12 flex flex-wrap gap-3">
           <Button to="/donate" variant="inverse" cursor="Donate">Donate now</Button>
           <Button to="/contact" variant="outline" className="!border-inverse-rule !text-on-inverse [--wipe:var(--on-inverse)] hover:!text-inverse">Partner with us</Button>
@@ -157,6 +175,7 @@ export default function Home() {
     <Page description="Pirento Foundation plants trees that survive, runs food and emergency relief, and supports education in Basti and eastern Uttar Pradesh.">
       <Hero />
       <Programmes />
+      <Ecosystem n={2} />
       <HowToGive />
       <Trust />
       <Roadmap />

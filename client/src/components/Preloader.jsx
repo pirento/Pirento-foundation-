@@ -46,17 +46,17 @@ export default function Preloader() {
 
   if (!show) return null;
   return (
-    <div ref={root} aria-hidden className="fixed inset-0 z-[100] flex flex-col justify-between bg-[#0f2620] p-5 text-[#eef2ee] sm:p-8 lg:p-12">
+    <div ref={root} aria-hidden className="fixed inset-0 z-[100] flex flex-col justify-between bg-[#07518a] p-5 text-[#fff0d5] sm:p-8 lg:p-12">
       <div className="flex justify-between overflow-hidden text-sm font-medium uppercase tracking-[0.04em]">
         <span data-top>{brand.name}</span>
         <span data-top>© {new Date().getFullYear()}</span>
       </div>
       <div>
-        <div ref={num} className="font-display font-medium leading-none tabular-nums tracking-[-0.05em]" style={{ fontSize: 'clamp(5rem, 20vw, 16rem)' }}>
+        <div ref={num} className="poster leading-none tabular-nums" style={{ fontSize: 'clamp(5rem, 20vw, 16rem)' }}>
           000
         </div>
-        <div className="mt-6 h-px bg-[#24443a]">
-          <div data-bar className="h-px origin-left scale-x-0 bg-[#f2b33d]" />
+        <div className="mt-6 h-px bg-[#2a6aa3]">
+          <div data-bar className="h-px origin-left scale-x-0 bg-[#f5e500]" />
         </div>
       </div>
     </div>

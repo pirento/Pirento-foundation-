@@ -66,7 +66,7 @@ function DonateForm({ config }) {
         name: brand.name,
         description: donateOptions.find((o) => o.key === form.programme)?.label,
         prefill: { name: form.name, email: form.email, contact: form.phone },
-        theme: { color: '#0f2620' },
+        theme: { color: '#07518A' },
         modal: { ondismiss: () => setState((s) => ({ ...s, busy: false })) },
         handler: async (resp) => {
           try {

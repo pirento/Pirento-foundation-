@@ -28,8 +28,8 @@ export function createApp() {
   app.get(/.*/, (_req, res, next) => res.sendFile(path.join(dist, 'index.html'), (e) => e && next()));
 
   app.use((err, _req, res, _next) => {
-    console.error(err);
-    res.status(err.status || 500).json({ error: err.status === 400 ? 'Bad request.' : 'Something went wrong. Please try again.' });
+    if (!err.expose) console.error(err);
+    res.status(err.status || 500).json({ error: err.expose ? err.message : err.status === 400 ? 'Bad request.' : 'Something went wrong. Please try again.' });
   });
   return app;
 }

@@ -29,6 +29,11 @@ export default function Footer() {
               {more.map((n) => (
                 <li key={n.to}><Link to={n.to} className="text-inverse-muted transition-colors hover:text-on-inverse">{n.label}</Link></li>
               ))}
+              <li>
+                <a href="https://pirento.com" target="_blank" rel="noopener noreferrer" className="text-inverse-muted transition-colors hover:text-on-inverse">
+                  pirento.com <span className="sr-only">(opens in a new tab)</span>↗
+                </a>
+              </li>
               <li><a href={`mailto:${brand.email}`} className="text-inverse-muted transition-colors hover:text-on-inverse">{brand.email}</a></li>
             </ul>
           </nav>
@@ -44,7 +49,7 @@ export default function Footer() {
           </div>
         </div>
         <svg viewBox="0 0 1000 120" className="mt-12 w-full fill-on-inverse" role="img" aria-label={brand.name}>
-          <text x="0" y="104" textLength="1000" lengthAdjust="spacingAndGlyphs" fontFamily="Space Grotesk Variable, sans-serif" fontWeight="600" fontSize="130" letterSpacing="-6">
+          <text x="0" y="104" textLength="1000" lengthAdjust="spacingAndGlyphs" fontFamily="Anton, sans-serif" fontSize="130">
             PIRENTO FOUNDATION
           </text>
         </svg>

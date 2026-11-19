@@ -1,6 +1,6 @@
 import PDFDocument from 'pdfkit';
 
-const C = { paper: '#f1f3f0', ink: '#0f2620', muted: '#56665f', rule: '#cbd6cf', accent: '#f2b33d', stone: '#e2e8e3' };
+const C = { paper: '#fff0d5', ink: '#072f52', muted: '#3f5a74', rule: '#e5cfa6', accent: '#f5e500', stone: '#f8e2b8', brand: '#07518a' };
 const LEGAL =
   'Pirento Foundation is a proposed Section 8 company sponsored by Venturecore Solutions Private Limited ' +
   '(CIN U63121UP2023PTC188021). Registration is pending. This document is not a tax-exemption (80G) receipt.';
@@ -22,7 +22,7 @@ export function renderCertificate(cert, donation, verifyUrl, out) {
   for (let y = 36; y < H; y += 36) doc.moveTo(0, y).lineTo(W, y);
   doc.stroke().restore();
   doc.roundedRect(24, 24, W - 48, H - 48, 16).lineWidth(1).stroke(C.ink);
-  doc.rect(0, 0, 14, H).fill(C.ink);
+  doc.rect(0, 0, 14, H).fill(C.brand);
 
   // Brand mark: accent square with ink ring + wordmark.
   doc.roundedRect(64, 60, 12, 12, 3).fillAndStroke(C.accent, C.ink);

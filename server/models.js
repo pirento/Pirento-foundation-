@@ -8,8 +8,11 @@ const userSchema = new Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 120 },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    phone: { type: String, trim: true, maxlength: 20 },
-    passwordHash: { type: String, required: true },
+    phone: { type: String, trim: true, unique: true, sparse: true }, // E.164, e.g. +919876543210
+    passwordHash: String, // empty for Google-only accounts
+    googleId: { type: String, unique: true, sparse: true },
+    emailVerified: { type: Boolean, default: false },
+    phoneVerified: { type: Boolean, default: false },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
   },
   { timestamps: true },
@@ -51,12 +54,26 @@ const certificateSchema = new Schema(
   { timestamps: true },
 );
 
+const otpSchema = new Schema(
+  {
+    channel: { type: String, enum: ['email', 'phone'], required: true },
+    target: { type: String, required: true, index: true },
+    purpose: { type: String, enum: ['login', 'register', 'reset'], required: true },
+    codeHash: { type: String, required: true },
+    attempts: { type: Number, default: 0 },
+    verified: { type: Boolean, default: false },
+    expiresAt: { type: Date, required: true, expires: 0 }, // MongoDB TTL deletes it after this time
+  },
+  { timestamps: true },
+);
+
 const counterSchema = new Schema({ _id: String, seq: { type: Number, default: 0 } });
 
 export const User = model('User', userSchema);
 export const Donation = model('Donation', donationSchema);
 export const Certificate = model('Certificate', certificateSchema);
 export const Counter = model('Counter', counterSchema);
+export const Otp = model('Otp', otpSchema);
 
 export async function nextReceiptNo(date = new Date()) {
   // Indian financial year runs April–March, so receipts restart each FY.
