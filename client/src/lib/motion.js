@@ -1,3 +1,4 @@
+// Smooth scrolling and the page entrance / scroll-reveal animations (GSAP + Lenis).
 import { useLayoutEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -57,9 +58,15 @@ export function usePageMotion(ref, key) {
       if (cancelled) return;
       ctx = gsap.context(() => {
         const tl = gsap.timeline();
-        if (hero.length) tl.to(hero, { yPercent: 0, duration: 1.3, ease: 'expo.out', stagger: 0.09 })
-        if (heroAfter.length) tl.to(heroAfter, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.07 }, hero.length ? '-=0.9' : 0);
-        if (heroVisual.length) tl.to(heroVisual, { autoAlpha: 1, scale: 1, duration: 1.1, ease: 'expo.out' }, '-=0.7');
+        if (hero.length) tl.to(hero, { yPercent: 0, duration: 1.3, ease: 'expo.out', stagger: 0.09 });
+        if (heroAfter.length)
+          tl.to(
+            heroAfter,
+            { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.07 },
+            hero.length ? '-=0.9' : 0,
+          );
+        if (heroVisual.length)
+          tl.to(heroVisual, { autoAlpha: 1, scale: 1, duration: 1.1, ease: 'expo.out' }, '-=0.7');
 
         root.querySelectorAll('[data-lines]').forEach((h) => {
           gsap.from(h.querySelectorAll('.line > span'), {
@@ -75,10 +82,16 @@ export function usePageMotion(ref, key) {
         ScrollTrigger.batch(items, {
           start: 'top 92%',
           once: true,
-          onEnter: (b) => gsap.to(b, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.07 }),
+          onEnter: (b) =>
+            gsap.to(b, { autoAlpha: 1, y: 0, duration: 0.9, ease: 'power3.out', stagger: 0.07 }),
         });
         hls.forEach((el) =>
-          ScrollTrigger.create({ trigger: el, start: 'top 85%', once: true, onEnter: () => setTimeout(() => el.classList.add('on'), 500) }),
+          ScrollTrigger.create({
+            trigger: el,
+            start: 'top 85%',
+            once: true,
+            onEnter: () => setTimeout(() => el.classList.add('on'), 500),
+          }),
         );
         ScrollTrigger.refresh();
       }, root);

@@ -1,3 +1,4 @@
+// Entry point: fonts, global styles, router, and the settings + auth providers around the app.
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';

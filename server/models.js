@@ -1,3 +1,4 @@
+// MongoDB models and the running number series (receipt numbers, member numbers).
 import mongoose from 'mongoose';
 
 const { Schema, model } = mongoose;
@@ -47,7 +48,12 @@ const donationSchema = new Schema(
     receiptKey: String, // unguessable key so guest donors can open their 80G receipt from email
     programme: { type: String, enum: PROGRAMMES, default: 'general' },
     method: { type: String, enum: ['online', 'bank', 'upi', 'cash', 'cheque'], default: 'online' },
-    status: { type: String, enum: ['created', 'paid', 'failed', 'refunded'], default: 'created', index: true },
+    status: {
+      type: String,
+      enum: ['created', 'paid', 'failed', 'refunded'],
+      default: 'created',
+      index: true,
+    },
     orderId: { type: String, index: true },
     paymentId: { type: String, unique: true, sparse: true },
     reference: String,
@@ -60,7 +66,11 @@ const donationSchema = new Schema(
 const certificateSchema = new Schema(
   {
     certNo: { type: String, required: true, unique: true },
-    kind: { type: String, enum: ['donation', 'membership', 'volunteer', 'participation', 'appreciation'], required: true },
+    kind: {
+      type: String,
+      enum: ['donation', 'membership', 'volunteer', 'participation', 'appreciation'],
+      required: true,
+    },
     recipientName: { type: String, required: true, trim: true, maxlength: 120 },
     email: { type: String, lowercase: true, trim: true },
     user: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -110,7 +120,12 @@ const subscriptionSchema = new Schema(
     programme: { type: String, enum: PROGRAMMES, default: 'general' },
     rzpId: { type: String, unique: true, sparse: true },
     planId: String,
-    status: { type: String, enum: ['created', 'active', 'halted', 'cancelled', 'completed'], default: 'created', index: true },
+    status: {
+      type: String,
+      enum: ['created', 'active', 'halted', 'cancelled', 'completed'],
+      default: 'created',
+      index: true,
+    },
     charges: { type: Number, default: 0 },
     lastChargedAt: Date,
     cancelledAt: Date,
@@ -150,7 +165,10 @@ const postSchema = new Schema(
   { timestamps: true },
 );
 
-const settingSchema = new Schema({ _id: String, data: { type: Schema.Types.Mixed, default: {} } }, { timestamps: true });
+const settingSchema = new Schema(
+  { _id: String, data: { type: Schema.Types.Mixed, default: {} } },
+  { timestamps: true },
+);
 
 const counterSchema = new Schema({ _id: String, seq: { type: Number, default: 0 } });
 
@@ -173,7 +191,11 @@ export const financialYear = (date = new Date()) => {
 
 async function next(series, prefix, date) {
   const fy = financialYear(date);
-  const c = await Counter.findOneAndUpdate({ _id: `${series}-${fy}` }, { $inc: { seq: 1 } }, { upsert: true, returnDocument: 'after' });
+  const c = await Counter.findOneAndUpdate(
+    { _id: `${series}-${fy}` },
+    { $inc: { seq: 1 } },
+    { upsert: true, returnDocument: 'after' },
+  );
   return `${prefix}/${fy}/${String(c.seq).padStart(5, '0')}`;
 }
 /** Donation receipts restart each financial year: PF/2026-27/00001. */
@@ -181,6 +203,10 @@ export const nextReceiptNo = (date = new Date()) => next('receipt', 'PF', date);
 /** Membership fee receipts use their own series so they are never mistaken for 80G donation receipts. */
 export const nextMembershipReceiptNo = (date = new Date()) => next('mreceipt', 'PFM', date);
 export async function nextMemberNo() {
-  const c = await Counter.findOneAndUpdate({ _id: 'member' }, { $inc: { seq: 1 } }, { upsert: true, returnDocument: 'after' });
+  const c = await Counter.findOneAndUpdate(
+    { _id: 'member' },
+    { $inc: { seq: 1 } },
+    { upsert: true, returnDocument: 'after' },
+  );
   return `PFMEM-${String(c.seq).padStart(6, '0')}`;
 }

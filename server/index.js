@@ -1,3 +1,4 @@
+// Starts the server: loads .env, checks the secret, connects to MongoDB, creates the admin, listens.
 import mongoose from 'mongoose';
 import { createApp } from './app.js';
 import { ensureAdmin } from './auth.js';

@@ -1,3 +1,4 @@
+// Who is signed in. Loads the session once and exposes signIn/logout to the rest of the app.
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import { api } from './api.js';
@@ -8,7 +9,10 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(undefined); // undefined = still loading
 
   useEffect(() => {
-    api('/auth/me').then((d) => setUser(d.user), () => setUser(null));
+    api('/auth/me').then(
+      (d) => setUser(d.user),
+      () => setUser(null),
+    );
   }, []);
 
   const value = {
@@ -31,6 +35,11 @@ export function RequireAuth({ admin, children }) {
   const location = useLocation();
   if (user === undefined) return <div className="min-h-[60vh]" aria-busy="true" />;
   if (!user || (admin && user.role !== 'admin'))
-    return <Navigate to={admin ? '/admin/login' : `/login?next=${encodeURIComponent(location.pathname)}`} replace />;
+    return (
+      <Navigate
+        to={admin ? '/admin/login' : `/login?next=${encodeURIComponent(location.pathname)}`}
+        replace
+      />
+    );
   return children;
 }

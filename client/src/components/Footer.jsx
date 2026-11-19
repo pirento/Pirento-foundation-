@@ -1,3 +1,4 @@
+// Site footer: motto, links, back-to-top, big wordmark and the legal line with registration numbers.
 import { Link } from 'react-router';
 import { ArrowUp } from 'lucide-react';
 import { brand, nav, socials, legalLinks } from '../data/site.js';
@@ -13,7 +14,13 @@ const more = [
 
 export default function Footer() {
   const st = useSettings();
-  const regs = [st.cin && `CIN ${st.cin}`, st.reg12A && `12A ${st.reg12A}`, st.reg80G && `80G ${st.reg80G}`, st.csr1 && `CSR-1 ${st.csr1}`, st.fcra && `FCRA ${st.fcra}`].filter(Boolean);
+  const regs = [
+    st.cin && `CIN ${st.cin}`,
+    st.reg12A && `12A ${st.reg12A}`,
+    st.reg80G && `80G ${st.reg80G}`,
+    st.csr1 && `CSR-1 ${st.csr1}`,
+    st.fcra && `FCRA ${st.fcra}`,
+  ].filter(Boolean);
   return (
     <footer className="inverse bg-inverse text-on-inverse">
       <div className="container-x pt-24">
@@ -26,44 +33,97 @@ export default function Footer() {
           <nav aria-label="Footer" className="grid grid-cols-2 gap-8 text-sm md:col-span-5">
             <ul className="space-y-3">
               {nav.map((n) => (
-                <li key={n.to}><Link to={n.to} className="text-inverse-muted transition-colors hover:text-on-inverse">{n.label}</Link></li>
+                <li key={n.to}>
+                  <Link to={n.to} className="text-inverse-muted transition-colors hover:text-on-inverse">
+                    {n.label}
+                  </Link>
+                </li>
               ))}
             </ul>
             <ul className="space-y-3">
               {more.map((n) => (
-                <li key={n.to}><Link to={n.to} className="text-inverse-muted transition-colors hover:text-on-inverse">{n.label}</Link></li>
+                <li key={n.to}>
+                  <Link to={n.to} className="text-inverse-muted transition-colors hover:text-on-inverse">
+                    {n.label}
+                  </Link>
+                </li>
               ))}
               <li>
-                <a href="https://pirento.com" target="_blank" rel="noopener noreferrer" className="text-inverse-muted transition-colors hover:text-on-inverse">
+                <a
+                  href="https://pirento.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-inverse-muted transition-colors hover:text-on-inverse"
+                >
                   pirento.com <span className="sr-only">(opens in a new tab)</span>↗
                 </a>
               </li>
-              <li><a href={`mailto:${brand.email}`} className="text-inverse-muted transition-colors hover:text-on-inverse">{brand.email}</a></li>
+              <li>
+                <a
+                  href={`mailto:${brand.email}`}
+                  className="text-inverse-muted transition-colors hover:text-on-inverse"
+                >
+                  {brand.email}
+                </a>
+              </li>
             </ul>
           </nav>
           <div className="flex items-start gap-3 md:col-span-2 md:justify-end">
             {socials.map((s) => (
-              <a key={s.href} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={`${s.label} (opens in a new tab)`} className="grid size-11 place-items-center rounded-full border border-inverse-rule hover:border-on-inverse">
+              <a
+                key={s.href}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${s.label} (opens in a new tab)`}
+                className="grid size-11 place-items-center rounded-full border border-inverse-rule hover:border-on-inverse"
+              >
                 <s.icon aria-hidden className="size-4" />
               </a>
             ))}
-            <button onClick={scrollToTop} aria-label="Back to top" className="grid size-11 place-items-center rounded-full bg-accent text-on-accent transition-transform duration-300 hover:-translate-y-1">
+            <button
+              onClick={scrollToTop}
+              aria-label="Back to top"
+              className="grid size-11 place-items-center rounded-full bg-accent text-on-accent transition-transform duration-300 hover:-translate-y-1"
+            >
               <ArrowUp aria-hidden className="size-4" />
             </button>
           </div>
         </div>
-        <svg viewBox="0 0 1000 120" className="mt-12 w-full fill-on-inverse" role="img" aria-label={brand.name}>
-          <text x="0" y="104" textLength="1000" lengthAdjust="spacingAndGlyphs" fontFamily="Anton, sans-serif" fontSize="130">
+        <svg
+          viewBox="0 0 1000 120"
+          className="mt-12 w-full fill-on-inverse"
+          role="img"
+          aria-label={brand.name}
+        >
+          <text
+            x="0"
+            y="104"
+            textLength="1000"
+            lengthAdjust="spacingAndGlyphs"
+            fontFamily="Anton, sans-serif"
+            fontSize="130"
+          >
             PIRENTO FOUNDATION
           </text>
         </svg>
         <div className="flex flex-col gap-2 py-8 text-xs leading-relaxed text-inverse-muted md:flex-row md:justify-between">
           <p>
-            © {new Date().getFullYear()} {brand.name}, a Section 8 company. An initiative of {brand.sponsor} (CIN {brand.sponsorCin}).
-            {regs.length > 0 && <><br />{regs.join(' · ')}</>}
+            © {new Date().getFullYear()} {brand.name}, a Section 8 company. An initiative of {brand.sponsor}{' '}
+            (CIN {brand.sponsorCin}).
+            {regs.length > 0 && (
+              <>
+                <br />
+                {regs.join(' · ')}
+              </>
+            )}
           </p>
           <p className="flex flex-wrap gap-x-4 gap-y-1">
-            {legalLinks.map((l) => <Link key={l.to} to={l.to} className="underline-offset-4 hover:text-on-inverse hover:underline">{l.label}</Link>)}
+            {legalLinks.map((l) => (
+              <Link key={l.to} to={l.to} className="underline-offset-4 hover:text-on-inverse hover:underline">
+                {l.label}
+              </Link>
+            ))}
             <span>Donations eligible under 80G.</span>
           </p>
         </div>

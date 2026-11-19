@@ -1,3 +1,4 @@
+// Custom cursor for mouse users: a dot plus a trailing ring that grows over links and can show a label.
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 
@@ -16,7 +17,7 @@ export default function Cursor() {
     const rx = gsap.quickTo(ring.current, 'x', { duration: 0.45, ease: 'power3.out' });
     const ry = gsap.quickTo(ring.current, 'y', { duration: 0.45, ease: 'power3.out' });
     const move = (e) => {
-      dx(e.clientX), dy(e.clientY), rx(e.clientX), ry(e.clientY);
+      (dx(e.clientX), dy(e.clientY), rx(e.clientX), ry(e.clientY));
       const el = e.target.closest?.('a, button, [data-cursor], input, select, textarea, summary, label');
       setHover(Boolean(el));
       setLabel(el?.closest('[data-cursor]')?.dataset.cursor ?? '');
