@@ -132,7 +132,6 @@ function MobileMenu({ open, onClose }) {
     user
       ? { to: user.role === 'admin' ? '/admin' : '/dashboard', label: 'My account' }
       : { to: '/login', label: 'Log in' },
-    { to: '/donate', label: 'Donate' },
   ];
   return (
     <div
@@ -140,9 +139,11 @@ function MobileMenu({ open, onClose }) {
       id="mobile-menu"
       inert={!open}
       style={{ clipPath: 'inset(0 0 100% 0)' }}
-      className="fixed inset-0 z-40 flex flex-col bg-paper px-5 pb-8 pt-24 sm:px-8 xl:hidden"
+      // The page is scroll-locked while the menu is open, so the panel scrolls itself on short screens.
+      data-lenis-prevent
+      className="fixed inset-0 z-40 flex flex-col overflow-y-auto overscroll-contain bg-paper px-5 pb-8 pt-24 sm:px-8 xl:hidden"
     >
-      <nav aria-label="Mobile" className="flex-1">
+      <nav aria-label="Mobile">
         <ul>
           {links.map((n, i) => (
             <li key={n.to} className="overflow-hidden border-b border-rule">
@@ -150,7 +151,7 @@ function MobileMenu({ open, onClose }) {
                 data-m
                 to={n.to}
                 onClick={onClose}
-                className="flex items-baseline gap-4 py-3 font-display text-[2.4rem] font-medium tracking-[-0.04em]"
+                className="flex items-baseline gap-4 py-2.5 font-display text-[clamp(1.6rem,7.5vw,2.4rem)] font-medium tracking-[-0.04em]"
               >
                 <span className="text-xs tabular-nums text-muted">{String(i + 1).padStart(2, '0')}</span>
                 {n.label}
@@ -159,7 +160,10 @@ function MobileMenu({ open, onClose }) {
           ))}
         </ul>
       </nav>
-      <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
+      <Button to="/donate" variant="accent" onClick={onClose} className="mt-8 w-full" cursor="Donate">
+        Donate
+      </Button>
+      <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
         <a href={`mailto:${brand.email}`} className="hover:text-ink">
           {brand.email}
         </a>
